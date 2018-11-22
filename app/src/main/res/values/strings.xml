@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AroundMe</string>
+    <string name="activity_name">My Collections</string>
 </resources>
