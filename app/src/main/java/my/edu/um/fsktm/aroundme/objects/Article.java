@@ -1,5 +1,13 @@
 package my.edu.um.fsktm.aroundme.objects;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.util.Log;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
@@ -7,6 +15,7 @@ import com.google.firebase.database.DatabaseReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,6 +30,7 @@ public class Article {
     public double averageRating;
     public String cover;
 
+    private Bitmap bitmap;
     private ArrayList<Comment> comments;
     private boolean coverUrlConstructed;
     private boolean fromFirebase;
@@ -81,7 +91,9 @@ public class Article {
     }
 
     public SimpleArticle toSimpleArticle() {
-        return new SimpleArticle(author, title, averageRating, cover, lat, lng);
+        SimpleArticle article = new SimpleArticle(author, title, averageRating, cover, lat, lng);
+        article.setArticleId(articleId);
+        return article;
     }
 
     public static void pushToFirebase(DatabaseReference simpleArticleRef,
@@ -106,5 +118,31 @@ public class Article {
 
         if (detailOnCompleteListener != null)
             detailTask.addOnCompleteListener(detailOnCompleteListener);
+    }
+
+    private Bitmap createEmptyImage() {
+        int width = 200, height = 200;
+        int color = Color.TRANSPARENT;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setColor(color);
+        canvas.drawRect(0F, 0F, (float) width, (float) height, paint);
+        return bitmap;
+    }
+
+    public Bitmap getBitmap(Context context) {
+        if (bitmap != null)
+            return bitmap;
+
+        final File localFile = new File(context.getFilesDir(), "images/" + articleId + ".jpg");
+        Log.d("localFile", String.valueOf(localFile) + " " + localFile.exists());
+
+        if (localFile.exists()) {
+            bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+            return bitmap;
+        }
+
+        return createEmptyImage();
     }
 }

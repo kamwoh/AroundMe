@@ -1,6 +1,7 @@
 package my.edu.um.fsktm.aroundme.fragments;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import my.edu.um.fsktm.aroundme.LoginActivity;
+import my.edu.um.fsktm.aroundme.MyCollections;
 import my.edu.um.fsktm.aroundme.R;
 
 
@@ -125,17 +127,22 @@ public class HomeFragment extends Fragment {
     }
 
     private void switchToListingFragment(String tag) {
-        Bundle args = new Bundle();
-        args.putString("tag", tag);
+        if (tag.equalsIgnoreCase("my_collections")) {
+            Intent intent = new Intent(getActivity(), MyCollections.class);
+            startActivity(intent);
+        } else {
+            Bundle args = new Bundle();
+            args.putString("tag", tag);
 
-        FragmentManager fm = getActivity().getSupportFragmentManager();
-        Fragment fragment = new ListingFragment();
-        fragment.setArguments(args);
+            FragmentManager fm = getActivity().getSupportFragmentManager();
+            Fragment fragment = new ListingFragment();
+            fragment.setArguments(args);
 
-        fm.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null) // return to previous page
-                .commit();
+            fm.beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(null) // return to previous page
+                    .commit();
+        }
     }
 
 }

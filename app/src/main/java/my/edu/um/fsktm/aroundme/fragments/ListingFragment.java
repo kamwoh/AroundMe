@@ -2,8 +2,11 @@ package my.edu.um.fsktm.aroundme.fragments;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -30,9 +35,18 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlacePhotoMetadata;
+import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
+import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -42,15 +56,21 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 import my.edu.um.fsktm.aroundme.LoginActivity;
 import my.edu.um.fsktm.aroundme.R;
 import my.edu.um.fsktm.aroundme.adapters.SimpleArticleAdapter;
 import my.edu.um.fsktm.aroundme.objects.Article;
+import my.edu.um.fsktm.aroundme.objects.PlaceTypes;
 import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
+
+import static android.app.Activity.RESULT_CANCELED;
 
 
 /**
@@ -60,6 +80,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
     private LoginActivity loginActivity;
     private ArrayList<SimpleArticle> simpleArticles;
+    private ArrayList<String> simpleArticleIds;
 
     private FirebaseDatabase database;
     private DatabaseReference simpleTagRef;
@@ -74,10 +95,32 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     private String tag;
     private ListView listView;
 
+    private double lat, lng;
+    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+
     public ListingFragment() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(loginActivity, data);
+                Log.i("success yahoooo", "Place: " + place.getName());
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(loginActivity, data);
+                // TODO: Handle the error.
+                Log.i("cb error", status.getStatusMessage());
+
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+                Log.d("wtf why you cancel", "why you do this");
+            }
+        }
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -89,6 +132,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 return true;
             case R.id.action_search:
                 Log.i("on search", "search");
+
                 return true;
             case android.R.id.home:
                 loginActivity.getSupportFragmentManager().popBackStack();
@@ -96,6 +140,150 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private boolean checkPermissionAndLocations() {
+        if (ActivityCompat.checkSelfPermission(loginActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(loginActivity, "permission blocked", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        LocationManager lm = (LocationManager) loginActivity.getSystemService(Context.LOCATION_SERVICE);
+
+        if (lm == null) {
+            Toast.makeText(loginActivity, "please turn on gps and restart", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        lng = location.getLongitude();
+        lat = location.getLatitude();
+
+        return true;
+    }
+
+    private void loadFirebaseSimpleArticle(DataSnapshot child) {
+        SimpleArticle simpleArticle = child.getValue(SimpleArticle.class);
+
+        if (simpleArticle == null)
+            return;
+
+        Location childLocation = new Location(simpleArticle.title);
+        childLocation.setLatitude(simpleArticle.lat);
+        childLocation.setLongitude(simpleArticle.lng);
+
+        Location currLocation = new Location("Current Location");
+        currLocation.setLatitude(lat);
+        currLocation.setLongitude(lng);
+
+        if (childLocation.distanceTo(currLocation) < 20000) {
+            simpleArticles.add(simpleArticle);
+            simpleArticleIds.add(simpleArticle.getArticleId());
+        }
+    }
+
+    private void readResultFromRequest(JSONObject result, int i) throws JSONException {
+        final Article article = new Article(tag, result);
+
+        if (simpleArticleIds.contains(article.articleId))
+            return;
+
+        geoDataClient.getPlacePhotos(article.articleId)
+                .addOnSuccessListener(new OnSuccessListener<PlacePhotoMetadataResponse>() {
+                    @Override
+                    public void onSuccess(PlacePhotoMetadataResponse placePhotoMetadataResponse) {
+                        PlacePhotoMetadataBuffer buffer = placePhotoMetadataResponse.getPhotoMetadata();
+
+                        if (buffer.getCount() != 0) {
+                            PlacePhotoMetadata photoMetadata = buffer.get(0);
+                            final File localFile = new File(getContext().getFilesDir(), "images/" + article.articleId + ".jpg");
+                            localFile.getParentFile().mkdirs();
+
+                            geoDataClient.getPhoto(photoMetadata)
+                                    .addOnSuccessListener(new OnSuccessListener<PlacePhotoResponse>() {
+                                        @Override
+                                        public void onSuccess(PlacePhotoResponse placePhotoResponse) {
+                                            try {
+                                                Bitmap bitmap = placePhotoResponse.getBitmap();
+                                                FileOutputStream fos = new FileOutputStream(localFile);
+                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                                            } catch (Exception e) {
+                                                Log.d("file not found", e.getMessage());
+                                            }
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d("gg cannot load", "wtf message " + e.getMessage());
+                                        }
+                                    });
+                        } else {
+                            Log.d("no google photo arhh", "buffer count " + buffer.getCount());
+                        }
+
+                        buffer.release();
+                    }
+                });
+
+        article.constructCoverUrl(getString(R.string.google_maps_key));
+
+        Article.pushToFirebase(simpleTagRef,
+                detailTagRef,
+                article,
+                null,
+                null);
+
+        if (simpleArticles.size() < 20) {
+            simpleArticles.add(article.toSimpleArticle());
+            simpleArticleIds.add(article.articleId);
+        }
+
+        Log.d("request " + i, article.toString());
+        Log.d("request " + i, result.toString());
+    }
+
+    private StringRequest getStringRequest() {
+
+        double radius = 10000;
+        String rankby = "prominence";
+
+        String url = String.format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?%s",
+                String.format("key=%s&", getString(R.string.google_maps_key)) +
+                        String.format("location=%s,%s&", lat, lng) +
+                        String.format("radius=%s&", radius) +
+                        String.format("rankby=%s&", rankby) +
+                        String.format("type=%s", PlaceTypes.getTypes(tag)));
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject reader = new JSONObject(response);
+                    JSONArray results = reader.getJSONArray("results");
+                    Log.d("how many results", String.valueOf(results.length()));
+
+                    for (int i = 0; i < results.length(); i++) {
+                        JSONObject result = results.getJSONObject(i);
+                        readResultFromRequest(result, i);
+                    }
+
+                    updateAdapter();
+                    listView.invalidate();
+                } catch (Exception e) {
+                    Log.e("error cb", e.getMessage());
+                    Toast.makeText(loginActivity, "wtf json error", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("request cb", "failed 9 jor: ");
+            }
+        });
+
+        return stringRequest;
     }
 
     @Override
@@ -107,34 +295,8 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         loginActivity = (LoginActivity) getActivity();
         loginActivity.getSupportFragmentManager().addOnBackStackChangedListener(this);
 
-//        googleApiClient = new GoogleApiClient.Builder(loginActivity)
-//                .addApi(Places.PLACE_DETECTION_API)
-//                .addApi(Places.GEO_DATA_API)
-//                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-//                    @Override
-//                    public void onConnected(@Nullable Bundle bundle) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onConnectionSuspended(int i) {
-//
-//                    }
-//                })
-//                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-//                    @Override
-//                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-//
-//                    }
-//                })
-//                .enableAutoManage(loginActivity, R.string.server_client_id, new GoogleApiClient.OnConnectionFailedListener() {
-//                    @Override
-//                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-//
-//                    }
-//                })
-//                .build();
-//        googleApiClient.connect();
+        if (!checkPermissionAndLocations())
+            return;
 
         auth = FirebaseAuth.getInstance();
         firebaseUser = auth.getCurrentUser();
@@ -143,101 +305,28 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         simpleTagRef = database.getReference("simple_articles/" + tag);
         detailTagRef = database.getReference("articles/" + tag);
 
-
         geoDataClient = Places.getGeoDataClient(loginActivity);
         placeDetectionClient = Places.getPlaceDetectionClient(loginActivity);
 
+        simpleArticles = new ArrayList<>();
+        simpleArticleIds = new ArrayList<>();
+
         simpleTagRef.orderByChild("rating")
-                .limitToLast(10)
+                .limitToLast(20)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Log.d("children item", String.valueOf(dataSnapshot.getChildrenCount()));
-                        if (ActivityCompat.checkSelfPermission(loginActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(loginActivity, "permission blocked", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        LocationManager lm = (LocationManager) loginActivity.getSystemService(Context.LOCATION_SERVICE);
-                        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-                        if (location == null) {
-                            Toast.makeText(loginActivity, "please turn on gps and restart", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        double lng = location.getLongitude();
-                        double lat = location.getLatitude();
-
-                        simpleArticles = new ArrayList<>();
 
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            SimpleArticle simpleArticle = child.getValue(SimpleArticle.class);
-                            Location childLocation = new Location(simpleArticle.title);
-                            childLocation.setLatitude(simpleArticle.lat);
-                            childLocation.setLongitude(simpleArticle.lng);
-
-                            Location currLocation = new Location("Current Location");
-                            currLocation.setLatitude(lat);
-                            currLocation.setLongitude(lng);
-
-                            if (childLocation.distanceTo(currLocation) < 5000) {
-                                simpleArticles.add(simpleArticle);
-                            }
+                            loadFirebaseSimpleArticle(child);
                         }
 
-                        if (simpleArticles.size() < 10) {
-                            double radius = 10000;
-                            String rankby = "prominence";
+                        Log.d("how many?", "its fucking " + simpleArticles.size());
 
+                        if (simpleArticles.size() < 20) {
                             RequestQueue queue = Volley.newRequestQueue(loginActivity);
-                            String url = String.format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?%s",
-                                    String.format("key=%s&", getString(R.string.google_maps_key)) +
-                                            String.format("location=%s,%s&", lat, lng) +
-                                            String.format("radius=%s&", radius) +
-                                            String.format("rankby=%s&", rankby) +
-                                            String.format("type=%s", "restaurant"));
-
-
-                            StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    try {
-                                        JSONObject reader = new JSONObject(response);
-                                        JSONArray results = reader.getJSONArray("results");
-                                        Log.d("how many results", String.valueOf(results.length()));
-
-                                        for (int i = 0; i < results.length(); i++) {
-                                            JSONObject result = results.getJSONObject(i);
-                                            Article article = new Article(tag, result);
-                                            article.constructCoverUrl(getString(R.string.google_maps_key));
-
-                                            Article.pushToFirebase(simpleTagRef,
-                                                    detailTagRef,
-                                                    article,
-                                                    null,
-                                                    null);
-
-                                            simpleArticles.add(article.toSimpleArticle());
-
-                                            Log.d("request " + i, article.toString());
-                                            Log.d("request " + i, result.toString());
-                                        }
-
-                                        updateAdapter();
-                                        listView.invalidate();
-                                    } catch (Exception e) {
-                                        Log.e("error cb", e.getMessage());
-                                        Toast.makeText(loginActivity, "wtf json error", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Log.d("request cb", "failed 9 jor: ");
-                                }
-                            });
-
+                            StringRequest stringRequest = getStringRequest();
                             queue.add(stringRequest);
                         } else {
                             updateAdapter();
@@ -251,17 +340,43 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                     }
                 });
 
-
-        simpleArticles = new ArrayList<>();
-
         Toast.makeText(getContext(), "in tag " + tag, Toast.LENGTH_SHORT).show();
-
         setHasOptionsMenu(true);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_with_search, menu);
+
+        MenuItem item = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) item.getActionView();
+        SearchView.SearchAutoComplete searchAutoComplete = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        searchAutoComplete.setDropDownAnchor(R.id.action_search);
+
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(loginActivity, android.R.layout.simple_list_item_1);
+
+        simpleTagRef.child(tag).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot articleSnapshot : dataSnapshot.getChildren()) {
+                    Log.d("loadinggggg", articleSnapshot.getKey());
+                    SimpleArticle simpleArticle = articleSnapshot.getValue(SimpleArticle.class);
+
+                    if (simpleArticle != null) {
+                        simpleArticle.setArticleId(articleSnapshot.getKey());
+                        adapter.add(simpleArticle.title);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        searchAutoComplete.setAdapter(adapter);
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -270,15 +385,10 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_listing, container, false);
-
         // Create the adapter to convert the array to views
-
-
         // Attach the adapter to a ListView
         listView = v.findViewById(R.id.simpleArticleList);
-
         updateAdapter();
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
