@@ -74,16 +74,26 @@ public class HomeFragment extends Fragment {
         loginActivity.setSupportActionBar(toolbar);
 
         int[] buttonIds = {
-                R.id.list_food,
-                R.id.list_landmark,
-                R.id.list_transportation,
-                R.id.list_accommodation,
-                R.id.list_my_collections,
-                R.id.list_donate
+                R.id.list_food_button,
+                R.id.list_landmark_button,
+                R.id.list_transportation_button,
+                R.id.list_accommodation_button,
+                R.id.list_my_collections_button,
+                R.id.list_donate_button
         };
 
-        for (int id : buttonIds) {
-            ImageButton button = v.findViewById(id);
+        int[] drawableIds = {
+                R.drawable.baseline_fastfood_black_18dp,
+                R.drawable.baseline_local_see_black_18dp,
+                R.drawable.baseline_directions_bus_black_18dp,
+                R.drawable.baseline_hotel_black_18dp,
+                R.drawable.baseline_collections_bookmark_black_18dp,
+                R.drawable.baseline_attach_money_black_18dp
+        };
+
+        for (int i = 0; i < buttonIds.length; i++) {
+            ImageButton button = v.findViewById(buttonIds[i]);
+            button.setImageResource(drawableIds[i]);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -100,19 +110,19 @@ public class HomeFragment extends Fragment {
     public void buttonOnClick(View v) {
         String tag = "";
         switch (v.getId()) {
-            case R.id.list_food:
+            case R.id.list_food_button:
                 tag = "food";
                 break;
-            case R.id.list_landmark:
+            case R.id.list_landmark_button:
                 tag = "landmark";
                 break;
-            case R.id.list_accommodation:
+            case R.id.list_accommodation_button:
                 tag = "accommodation";
                 break;
-            case R.id.list_transportation:
+            case R.id.list_transportation_button:
                 tag = "transportation";
                 break;
-            case R.id.list_my_collections:
+            case R.id.list_my_collections_button:
                 tag = "my_collections";
                 break;
             default: // donate
