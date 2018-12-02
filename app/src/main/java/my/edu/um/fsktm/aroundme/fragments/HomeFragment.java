@@ -38,7 +38,7 @@ public class HomeFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_sign_out:
                 Log.d("signout", "signout");
-                GPlusFragment.switchToGPlusFragment(fm, this,true);
+                GPlusFragment.switchToGPlusFragment(fm, this, true);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

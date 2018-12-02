@@ -10,5 +10,8 @@
     <string name="server_client_id">874953374741-16bii5a2r3qqr057loq5m4tne5pk4ati.apps.googleusercontent.com</string>
     <string name="name">Name :</string>
 
+    <string name="google_maps_key">AIzaSyB3a14R0yagCNehgaC2t59u8x2MU0J3aIc</string>
+
     <string name="hello_blank_fragment">Hello blank fragment Hello blank fragment Hello blank fragment Hello blank fragment Hello blank fragment Hello blank fragment</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

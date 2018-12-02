@@ -28,8 +28,10 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.FirebaseDatabase;
 
 import my.edu.um.fsktm.aroundme.R;
+import my.edu.um.fsktm.aroundme.objects.User;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,6 +40,7 @@ public class GPlusFragment extends Fragment {
 
     private GoogleSignInClient googleSignInClient;
     private GoogleSignInAccount account;
+    private FirebaseDatabase firebaseDatabase;
     private FirebaseAuth auth;
     private static final int RC_SIGN_IN = 0;
     private boolean isSignOut = false; // to check whether this fragment should skip sign in page
@@ -63,6 +66,8 @@ public class GPlusFragment extends Fragment {
         googleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
 
         auth = FirebaseAuth.getInstance();
+
+        firebaseDatabase = FirebaseDatabase.getInstance();
 
         if (isSignOut) {
             // handle sign out action first, then only create view
@@ -120,12 +125,17 @@ public class GPlusFragment extends Fragment {
 
         Log.d("id_token", account.getIdToken());
 
+
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            User user = new User(account.getEmail(), account.getDisplayName());
+
+                            User.restoreOrPush(firebaseDatabase.getReference().child("users"), user, true);
+
                             Fragment fragment = new HomeFragment();
                             fm.beginTransaction()
                                     .remove(GPlusFragment.this)
