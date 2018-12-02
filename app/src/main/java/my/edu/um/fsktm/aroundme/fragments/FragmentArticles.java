@@ -1,11 +1,15 @@
-package my.edu.um.fsktm.aroundme;
+package my.edu.um.fsktm.aroundme.fragments;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+
+import my.edu.um.fsktm.aroundme.R;
+import my.edu.um.fsktm.aroundme.adapters.CustomArticleListAdapter;
+import my.edu.um.fsktm.aroundme.objects.Articles;
 
 public class FragmentArticles extends Fragment {
     ListView list;

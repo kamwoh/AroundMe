@@ -14,6 +14,5 @@
 
     <string name="hello_blank_fragment">Hello blank fragment Hello blank fragment Hello blank fragment Hello blank fragment Hello blank fragment Hello blank fragment</string>
     <string name="title_activity_maps">Map</string>
-    <string name="activity_name">My Collections</string>
->>>>>>> chiayi-mycollection
+    <string name="activity_name">Around Me</string>
 </resources>

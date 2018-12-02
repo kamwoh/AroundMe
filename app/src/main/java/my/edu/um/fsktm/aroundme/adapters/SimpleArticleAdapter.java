@@ -1,4 +1,4 @@
-package my.edu.um.fsktm.aroundme.objects;
+package my.edu.um.fsktm.aroundme.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 import my.edu.um.fsktm.aroundme.R;
+import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
 
 public class SimpleArticleAdapter extends ArrayAdapter<SimpleArticle> {
 

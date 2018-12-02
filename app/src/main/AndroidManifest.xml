@@ -33,9 +33,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".MyCollections" />
-        <activity android:name=".FragmentBookmarks" />
-        <activity android:name=".FragmentArticles" />
-        <activity android:name=".FragmentNotifications" />
+        <!--<activity android:name=".FragmentBookmarks" />-->
+        <!--<activity android:name=".FragmentArticles" />-->
+        <!--<activity android:name=".FragmentNotifications" />-->
     </application>
 
 </manifest>

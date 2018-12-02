@@ -1,4 +1,6 @@
-package my.edu.um.fsktm.aroundme;
+package my.edu.um.fsktm.aroundme.objects;
+
+import my.edu.um.fsktm.aroundme.R;
 
 public class Bookmarks {
 

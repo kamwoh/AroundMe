@@ -1,8 +1,7 @@
-package my.edu.um.fsktm.aroundme;
+package my.edu.um.fsktm.aroundme.adapters;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
-import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,16 +15,19 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import my.edu.um.fsktm.aroundme.R;
+
 public class TabAdapter extends FragmentStatePagerAdapter {
     private final List<Fragment> mFragmentList = new ArrayList<>();
     private final List<String> mFragmentTitleList = new ArrayList<>();
     private final List<Integer> mFragmentIconList = new ArrayList<>();
     private Context context;
 
-    TabAdapter(FragmentManager fm, Context context) {
+    public TabAdapter(FragmentManager fm, Context context) {
         super(fm);
         this.context = context;
     }
+
     @Override
     public Fragment getItem(int position) {
         return mFragmentList.get(position);
@@ -36,12 +38,14 @@ public class TabAdapter extends FragmentStatePagerAdapter {
         mFragmentTitleList.add(title);
         mFragmentIconList.add(tabIcon);
     }
+
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
         //return mFragmentTitleList.get(position);
         return null;
     }
+
     @Override
     public int getCount() {
         return mFragmentList.size();

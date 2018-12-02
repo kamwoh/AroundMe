@@ -48,9 +48,9 @@ import java.util.ArrayList;
 
 import my.edu.um.fsktm.aroundme.LoginActivity;
 import my.edu.um.fsktm.aroundme.R;
+import my.edu.um.fsktm.aroundme.adapters.SimpleArticleAdapter;
 import my.edu.um.fsktm.aroundme.objects.Article;
 import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticleAdapter;
 
 
 /**
@@ -160,6 +160,12 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
                         LocationManager lm = (LocationManager) loginActivity.getSystemService(Context.LOCATION_SERVICE);
                         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                        if (location == null) {
+                            Toast.makeText(loginActivity, "please turn on gps and restart", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         double lng = location.getLongitude();
                         double lat = location.getLatitude();
 

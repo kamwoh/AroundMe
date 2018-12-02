@@ -3,10 +3,14 @@ package my.edu.um.fsktm.aroundme;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+
+import my.edu.um.fsktm.aroundme.adapters.TabAdapter;
+import my.edu.um.fsktm.aroundme.fragments.FragmentArticles;
+import my.edu.um.fsktm.aroundme.fragments.FragmentBookmarks;
+import my.edu.um.fsktm.aroundme.fragments.FragmentNotifications;
 
 public class MyCollections extends AppCompatActivity {
     private Toolbar toolbar;

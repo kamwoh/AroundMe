@@ -1,27 +1,24 @@
-package my.edu.um.fsktm.aroundme;
+package my.edu.um.fsktm.aroundme.objects;
 
-import java.sql.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import my.edu.um.fsktm.aroundme.R;
 
 public class Articles {
     private String[] comment;
     private Integer[] articleImg;
 
-    public String[] getComment(){
+    public String[] getComment() {
         return comment;
     }
 
-    public void setComment(String[] comment){
+    public void setComment(String[] comment) {
         this.comment = comment;
     }
 
-    public Integer[] getArticleImg(){
+    public Integer[] getArticleImg() {
         return articleImg;
     }
 
-    public void setArticleImg(Integer[] foodImg){
+    public void setArticleImg(Integer[] foodImg) {
         this.articleImg = foodImg;
     }
 
