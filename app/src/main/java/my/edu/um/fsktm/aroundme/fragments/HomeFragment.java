@@ -51,6 +51,8 @@ public class HomeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Toast.makeText(getActivity(), "Welcome back", Toast.LENGTH_LONG).show();
+
         setHasOptionsMenu(true);
     }
 
@@ -102,8 +104,6 @@ public class HomeFragment extends Fragment {
                 }
             });
         }
-
-        Toast.makeText(getActivity(), "Welcome back", Toast.LENGTH_LONG).show();
 
         return v;
     }

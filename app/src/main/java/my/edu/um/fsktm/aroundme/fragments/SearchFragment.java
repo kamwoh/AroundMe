@@ -18,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -52,7 +51,7 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
     }
 
     private void searchForTag(final String keyword, String tag) {
-        Toast.makeText(loginActivity, "serachhh " + tag, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(loginActivity, "serachhh " + tag, Toast.LENGTH_SHORT).show();
         simpleTagRef = FirebaseDatabase.getInstance().getReference().child("simple_articles/" + tag);
 
         simpleTagRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -70,7 +69,7 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
                 }
 
                 Log.d("array list cb", results.toString());
-                Toast.makeText(loginActivity, "foodddddddddddddd", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(loginActivity, "foodddddddddddddd", Toast.LENGTH_SHORT).show();
                 SimpleArticleAdapter adapter = new SimpleArticleAdapter(loginActivity, results);
                 resultList.setAdapter(adapter);
                 resultList.invalidate();

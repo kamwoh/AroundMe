@@ -277,7 +277,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                     listView.invalidate();
                 } catch (Exception e) {
                     Log.e("error cb", e.getMessage());
-                    Toast.makeText(loginActivity, "wtf json error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(loginActivity, "Connection error", Toast.LENGTH_SHORT).show();
                 }
             }
         }, new Response.ErrorListener() {
@@ -346,7 +346,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                     }
                 });
 
-        Toast.makeText(getContext(), "in tag " + tag, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(), "in tag " + tag, Toast.LENGTH_SHORT).show();
         setHasOptionsMenu(true);
     }
 
