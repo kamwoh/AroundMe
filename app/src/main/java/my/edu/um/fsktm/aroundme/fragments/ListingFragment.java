@@ -200,7 +200,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
                         if (buffer.getCount() != 0) {
                             PlacePhotoMetadata photoMetadata = buffer.get(0);
-                            final File localFile = new File(getContext().getFilesDir(), "images/" + article.articleId + ".jpg");
+                            final File localFile = new File(loginActivity.getFilesDir(), "images/" + article.articleId + ".jpg");
                             localFile.getParentFile().mkdirs();
 
                             geoDataClient.getPhoto(photoMetadata)

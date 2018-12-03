@@ -132,7 +132,7 @@ public class GPlusFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            User user = new User(account.getEmail(), account.getDisplayName());
+                            User user = new User(account.getId(), account.getDisplayName());
 
                             User.restoreOrPush(firebaseDatabase.getReference().child("users"), user, true);
 
