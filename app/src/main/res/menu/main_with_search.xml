@@ -6,9 +6,8 @@
         android:id="@+id/action_search"
         android:title="Search"
         android:orderInCategory="100"
-        android:icon="@drawable/ic_launcher_foreground"
-        app:showAsAction="always"
-        app:actionViewClass="android.support.v7.widget.SearchView" />
+        android:icon="@drawable/baseline_search_black_18dp"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_settings"

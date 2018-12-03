@@ -91,7 +91,7 @@ public class Article {
     }
 
     public SimpleArticle toSimpleArticle() {
-        SimpleArticle article = new SimpleArticle(author, title, averageRating, cover, lat, lng);
+        SimpleArticle article = new SimpleArticle(author, title, averageRating, cover, lat, lng, PlaceTypes.getTypes(tag));
         article.setArticleId(articleId);
         return article;
     }

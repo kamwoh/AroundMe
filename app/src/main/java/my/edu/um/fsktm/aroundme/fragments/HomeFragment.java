@@ -72,6 +72,7 @@ public class HomeFragment extends Fragment {
         Toolbar toolbar = loginActivity.findViewById(R.id.my_toolbar);
         toolbar.setVisibility(View.VISIBLE);
         loginActivity.setSupportActionBar(toolbar);
+        loginActivity.getSupportActionBar().setTitle(loginActivity.getString(R.string.app_name));
 
         int[] buttonIds = {
                 R.id.list_food_button,
@@ -88,7 +89,7 @@ public class HomeFragment extends Fragment {
                 R.drawable.baseline_directions_bus_black_18dp,
                 R.drawable.baseline_hotel_black_18dp,
                 R.drawable.baseline_collections_bookmark_black_18dp,
-                R.drawable.baseline_attach_money_black_18dp
+                R.drawable.baseline_search_black_18dp
         };
 
         for (int i = 0; i < buttonIds.length; i++) {
@@ -133,7 +134,23 @@ public class HomeFragment extends Fragment {
             switchToListingFragment(tag);
         } else {
             // go to donate page
+            switchToSearchFragment();
         }
+    }
+
+    private void switchToSearchFragment() {
+        Bundle args = new Bundle();
+        args.putString("tag", "");
+        args.putString("title", "Search");
+
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        Fragment fragment = new SearchFragment();
+        fragment.setArguments(args);
+
+        fm.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null) // return to previous page
+                .commit();
     }
 
     private void switchToListingFragment(String tag) {
@@ -143,6 +160,7 @@ public class HomeFragment extends Fragment {
         } else {
             Bundle args = new Bundle();
             args.putString("tag", tag);
+            args.putString("title", tag.substring(0, 1).toUpperCase() + tag.substring(1));
 
             FragmentManager fm = getActivity().getSupportFragmentManager();
             Fragment fragment = new ListingFragment();

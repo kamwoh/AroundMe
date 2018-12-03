@@ -27,6 +27,7 @@ public class SimpleArticle implements Comparable<SimpleArticle> {
     public String title;
     public Double rating;
     public String cover;
+    public String keyword = "";
 
     public Double lat;
     public Double lng;
@@ -39,13 +40,14 @@ public class SimpleArticle implements Comparable<SimpleArticle> {
 
     }
 
-    public SimpleArticle(String author, String title, Double rating, String cover, Double lat, Double lng) {
+    public SimpleArticle(String author, String title, Double rating, String cover, Double lat, Double lng, String keyword) {
         this.author = author;
         this.title = title;
         this.rating = rating;
         this.cover = cover;
         this.lat = lat;
         this.lng = lng;
+        this.keyword = keyword;
 
         articleId = "";
         noPhoto = false;

@@ -15,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,7 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -62,6 +60,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import my.edu.um.fsktm.aroundme.LoginActivity;
 import my.edu.um.fsktm.aroundme.R;
@@ -69,8 +69,6 @@ import my.edu.um.fsktm.aroundme.adapters.SimpleArticleAdapter;
 import my.edu.um.fsktm.aroundme.objects.Article;
 import my.edu.um.fsktm.aroundme.objects.PlaceTypes;
 import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
-
-import static android.app.Activity.RESULT_CANCELED;
 
 
 /**
@@ -115,7 +113,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 // TODO: Handle the error.
                 Log.i("cb error", status.getStatusMessage());
 
-            } else if (resultCode == RESULT_CANCELED) {
+            } else if (resultCode == Activity.RESULT_CANCELED) {
                 // The user canceled the operation.
                 Log.d("wtf why you cancel", "why you do this");
             }
@@ -132,7 +130,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 return true;
             case R.id.action_search:
                 Log.i("on search", "search");
-
+                switchToSearchFragment();
                 return true;
             case android.R.id.home:
                 loginActivity.getSupportFragmentManager().popBackStack();
@@ -157,6 +155,11 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
+        if (location == null) {
+            Toast.makeText(loginActivity, "please turn on gps and restart", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         lng = location.getLongitude();
         lat = location.getLatitude();
 
@@ -177,7 +180,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         currLocation.setLatitude(lat);
         currLocation.setLongitude(lng);
 
-        if (childLocation.distanceTo(currLocation) < 20000) {
+        if (childLocation.distanceTo(currLocation) < 5000) {
             simpleArticles.add(simpleArticle);
             simpleArticleIds.add(simpleArticle.getArticleId());
         }
@@ -229,16 +232,17 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
         article.constructCoverUrl(getString(R.string.google_maps_key));
 
-        Article.pushToFirebase(simpleTagRef,
+        Article.pushToFirebase(
+                simpleTagRef,
                 detailTagRef,
                 article,
                 null,
                 null);
 
-        if (simpleArticles.size() < 20) {
-            simpleArticles.add(article.toSimpleArticle());
-            simpleArticleIds.add(article.articleId);
-        }
+//        if (simpleArticles.size() < 20) {
+        simpleArticles.add(article.toSimpleArticle());
+        simpleArticleIds.add(article.articleId);
+//        }
 
         Log.d("request " + i, article.toString());
         Log.d("request " + i, result.toString());
@@ -254,7 +258,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                         String.format("location=%s,%s&", lat, lng) +
                         String.format("radius=%s&", radius) +
                         String.format("rankby=%s&", rankby) +
-                        String.format("type=%s", PlaceTypes.getTypes(tag)));
+                        String.format("keyword=%s", PlaceTypes.getTypes(tag)));
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
@@ -292,8 +296,11 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
         tag = getArguments().getString("tag");
 
+        String title = getArguments().getString("title");
+
         loginActivity = (LoginActivity) getActivity();
         loginActivity.getSupportFragmentManager().addOnBackStackChangedListener(this);
+        loginActivity.getSupportActionBar().setTitle(title);
 
         if (!checkPermissionAndLocations())
             return;
@@ -311,8 +318,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         simpleArticles = new ArrayList<>();
         simpleArticleIds = new ArrayList<>();
 
-        simpleTagRef.orderByChild("rating")
-                .limitToLast(20)
+        simpleTagRef
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -324,7 +330,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
                         Log.d("how many?", "its fucking " + simpleArticles.size());
 
-                        if (simpleArticles.size() < 20) {
+                        if (simpleArticles.size() < 30) {
                             RequestQueue queue = Volley.newRequestQueue(loginActivity);
                             StringRequest stringRequest = getStringRequest();
                             queue.add(stringRequest);
@@ -348,35 +354,6 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_with_search, menu);
 
-        MenuItem item = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) item.getActionView();
-        SearchView.SearchAutoComplete searchAutoComplete = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
-        searchAutoComplete.setDropDownAnchor(R.id.action_search);
-
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(loginActivity, android.R.layout.simple_list_item_1);
-
-        simpleTagRef.child(tag).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot articleSnapshot : dataSnapshot.getChildren()) {
-                    Log.d("loadinggggg", articleSnapshot.getKey());
-                    SimpleArticle simpleArticle = articleSnapshot.getValue(SimpleArticle.class);
-
-                    if (simpleArticle != null) {
-                        simpleArticle.setArticleId(articleSnapshot.getKey());
-                        adapter.add(simpleArticle.title);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        searchAutoComplete.setAdapter(adapter);
-
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -388,6 +365,11 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         // Create the adapter to convert the array to views
         // Attach the adapter to a ListView
         listView = v.findViewById(R.id.simpleArticleList);
+
+        String title = getArguments().getString("title");
+
+        loginActivity.getSupportActionBar().setTitle(title);
+
         updateAdapter();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -410,7 +392,55 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     }
 
     private void updateAdapter() {
+
+        Collections.sort(simpleArticles, new Comparator<SimpleArticle>() {
+            @Override
+            public int compare(SimpleArticle o1, SimpleArticle o2) {
+                Location location1 = new Location(o1.title);
+                location1.setLatitude(o1.lat);
+                location1.setLongitude(o1.lng);
+
+                Location location2 = new Location(o2.title);
+                location2.setLatitude(o2.lat);
+                location2.setLongitude(o2.lng);
+
+                Location currentLocation = new Location("Current location");
+                currentLocation.setLatitude(lat);
+                currentLocation.setLongitude(lng);
+
+                double distance1 = currentLocation.distanceTo(location1);
+                double distance2 = currentLocation.distanceTo(location2);
+
+                double distance = distance1 - distance2;
+
+//                Log.d("distanceee", o1.title + " vs " + o2.title + " " + distance);
+
+                return (int) distance;
+            }
+        });
+
+        if (simpleArticles.size() > 0) {
+            int lastIndex = Math.min(simpleArticles.size(), 30);
+            simpleArticles = new ArrayList<>(simpleArticles.subList(0, lastIndex));
+        }
+
         SimpleArticleAdapter adapter = new SimpleArticleAdapter(getActivity(), simpleArticles);
         listView.setAdapter(adapter);
     }
+
+    private void switchToSearchFragment() {
+        Bundle args = new Bundle();
+        args.putString("tag", tag);
+        args.putString("title", tag.substring(0, 1).toUpperCase() + tag.substring(1) + " Searching");
+
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        Fragment fragment = new SearchFragment();
+        fragment.setArguments(args);
+
+        fm.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null) // return to previous page
+                .commit();
+    }
+
 }
