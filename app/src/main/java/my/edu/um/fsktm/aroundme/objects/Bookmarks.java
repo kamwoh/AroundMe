@@ -29,8 +29,8 @@ public class Bookmarks {
     };
 
     public static final Integer FOODIMG[] = {
-            R.drawable.food1,
-            R.drawable.food2
+            R.drawable.article1,
+            R.drawable.article2
     };
 
 

@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -105,6 +106,11 @@ public class ArticleViewActivity extends AppCompatActivity {
         populateCommentsList();
 
         final ScrollView scrollViewParent = findViewById(R.id.article_view_scroll_view);
+        final ProgressBar progressBar = findViewById(R.id.article_view_progress_bar);
+
+        scrollViewParent.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+
         View customView = findViewById(R.id.article_view_custom_view);
 
         // Merge the scroll function of ListView && ScrollView
@@ -206,8 +212,17 @@ public class ArticleViewActivity extends AppCompatActivity {
                 ImageView cover = findViewById(R.id.article_view_cover);
 
                 title.setText(article.title);
-                content.setText(article.description);
+
+                String text = article.description;
+
+                if (text.length() == 0)
+                    text = "No description.";
+
+                content.setText(text);
                 cover.setImageBitmap(article.getBitmap(getApplicationContext()));
+
+                scrollViewParent.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -241,9 +256,6 @@ public class ArticleViewActivity extends AppCompatActivity {
 
             case R.id.action_favorite:
                 // User chose the "Favorite" action, mark the current item
-                //TODO: writing to bookmarks
-
-
                 FirebaseDatabase.getInstance()
                         .getReference()
                         .child("users")

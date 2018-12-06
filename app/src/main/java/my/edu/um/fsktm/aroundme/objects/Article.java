@@ -77,6 +77,7 @@ public class Article {
     public Article(HashMap firebaseMap) {
         // construct variable
         Log.d("firebase map", firebaseMap.toString());
+        articleId = (String) firebaseMap.get("articleId");
         tag = (String) firebaseMap.get("tag");
         title = (String) firebaseMap.get("title");
         description = (String) firebaseMap.get("description");

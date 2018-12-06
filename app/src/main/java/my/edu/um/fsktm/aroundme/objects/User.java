@@ -33,7 +33,7 @@ public class User {
         final DatabaseReference userRef = usersRef.child(user.userId);
 
         if (isLogin) {
-            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            userRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.getChildrenCount() == 0) { // first time
@@ -43,27 +43,24 @@ public class User {
 
                         if (map != null) {
                             if (map.containsKey("posts")) {
-                                HashMap<String, String> postsMap;
-                                postsMap = (HashMap<String, String>) map.get("posts");
-                                ArrayList<String> posts = new ArrayList<>();
+                                HashMap<String, Boolean> postsMap;
+                                postsMap = (HashMap<String, Boolean>) map.get("posts");
+                                ArrayList<String> posts = user.posts;
 
                                 for (String key : postsMap.keySet()) {
-                                    posts.add(postsMap.get(key));
+                                    if (postsMap.get(key) && !posts.contains(key))
+                                        posts.add(key);
                                 }
-
-                                user.posts.addAll(posts);
                             }
 
                             if (map.containsKey("bookmarks")) {
-                                HashMap<String, String> bookmarksMap;
-                                bookmarksMap = (HashMap<String, String>) map.get("bookmarks");
-                                ArrayList<String> bookmarks = new ArrayList<>();
-
+                                HashMap<String, Boolean> bookmarksMap;
+                                bookmarksMap = (HashMap<String, Boolean>) map.get("bookmarks");
+                                ArrayList<String> bookmarks = user.bookmarks;
                                 for (String key : bookmarksMap.keySet()) {
-                                    bookmarks.add(bookmarksMap.get(key));
+                                    if (bookmarksMap.get(key) && !bookmarks.contains(key))
+                                        bookmarks.add(key);
                                 }
-
-                                user.bookmarks.addAll(bookmarks);
                             }
                         }
                     }

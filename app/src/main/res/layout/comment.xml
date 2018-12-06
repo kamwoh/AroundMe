@@ -11,12 +11,14 @@
         android:id="@+id/comment_avatar"
         android:layout_width="60dp"
         android:layout_height="60dp"
+        android:layout_marginTop="10dp"
         android:src="@drawable/ic_launcher_foreground" />
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0dp"
-        android:paddingLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="left">
@@ -34,6 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Beautiful beautiful beautiful beautiful angel"
+            android:layout_marginTop="2dp"
             android:gravity="left" />
 
         <RatingBar
@@ -42,6 +45,7 @@
             style="?android:attr/ratingBarStyleSmall"
             android:layout_height="wrap_content"
             android:clickable="true"
+            android:layout_marginTop="2dp"
             android:numStars="5" />
     </LinearLayout>
 

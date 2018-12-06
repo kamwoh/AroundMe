@@ -22,13 +22,14 @@ public class CustomNotiListAdapter extends ArrayAdapter<String> {
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
 
+        if (view == null) {
+            view = inflater.inflate(R.layout.custom_notificationlist, null, true);
+        }
 
-        View rowView = inflater.inflate(R.layout.custom_notificationlist, null, true);
-
-        TextView notification = (TextView) rowView.findViewById(R.id.noti);
+        TextView notification = (TextView) view.findViewById(R.id.noti);
 
         notification.setText(text[position]);
-        return rowView;
+        return view;
 
     }
 }

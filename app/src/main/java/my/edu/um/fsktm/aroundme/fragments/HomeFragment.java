@@ -1,6 +1,7 @@
 package my.edu.um.fsktm.aroundme.fragments;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -40,6 +41,8 @@ public class HomeFragment extends Fragment {
         FragmentManager fm = getActivity().getSupportFragmentManager();
 
         switch (item.getItemId()) {
+            case R.id.action_settings:
+                return true;
             case R.id.action_sign_out:
                 Log.d("HomeFragment", "SignOut");
                 GPlusFragment.switchToGPlusFragment(fm, this, true);
@@ -161,7 +164,7 @@ public class HomeFragment extends Fragment {
     private void switchToListingFragment(String tag) {
         if (tag.equalsIgnoreCase("my_collections")) {
             Intent intent = new Intent(getActivity(), MyCollections.class);
-            startActivity(intent);
+            startActivityForResult(intent, 0);
         } else {
             Bundle args = new Bundle();
             args.putString("tag", tag);
@@ -178,4 +181,15 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                boolean signOut = data.getBooleanExtra("signOut", false);
+
+                if (signOut)
+                    GPlusFragment.switchToGPlusFragment(getActivity().getSupportFragmentManager(), this, true);
+            }
+        }
+    }
 }

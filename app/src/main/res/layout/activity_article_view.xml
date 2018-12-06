@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".ArticleViewActivity">
 
     <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
@@ -13,8 +12,17 @@
         android:background="@color/blue_grey_500"
         android:elevation="4dp" />
 
+    <ProgressBar
+        android:id="@+id/article_view_progress_bar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
+
     <ScrollView
         android:id="@+id/article_view_scroll_view"
+        android:layout_below="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -25,8 +33,13 @@
 
             <ImageView
                 android:id="@+id/article_view_cover"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:adjustViewBounds="true"
+                android:layout_marginTop="20dp"
+                android:scaleType="centerCrop"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:src="@drawable/ic_launcher_foreground" />
 
             <TextView
@@ -34,7 +47,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/article_view_cover"
-                android:paddingLeft="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:singleLine="true"
                 android:text="KLCC"
                 android:textSize="18sp"
@@ -45,8 +61,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/article_view_title"
+                android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:paddingLeft="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:text="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
 "
@@ -57,16 +75,31 @@
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:layout_below="@+id/article_view_content"
                 tools:context=".MapsActivity" />
+
+            <TextView
+                android:id="@+id/article_view_reviews_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/article_view_map"
+                android:text="Reviews"
+                android:layout_alignParentLeft="true"
+                android:textSize="20sp"
+                android:layout_marginLeft="20dp"
+                android:paddingTop="10dp" />
 
             <ListView
                 android:id="@+id/article_view_list_view_reviews"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/article_view_map"
-                android:layout_centerInParent="true"
-                android:paddingLeft="20dp" />
+                android:layout_below="@+id/article_view_reviews_title"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:paddingTop="10dp" />
 
             <View
                 android:id="@+id/article_view_custom_view"
@@ -79,19 +112,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/article_view_list_view_reviews"
-                android:layout_centerInParent="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="20dp"
                 android:paddingTop="15dp"
                 android:text="Rate Me"
                 android:textSize="18sp" />
 
             <EditText
                 android:id="@+id/article_view_review"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/article_view_rate_me"
-                android:layout_centerInParent="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:ems="10"
                 android:inputType="textPersonName"
+                android:layout_marginTop="5dp"
                 android:text="" />
 
             <RatingBar
@@ -99,7 +136,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/article_view_review"
-                android:layout_centerInParent="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="5dp"
                 android:numStars="5"
                 android:stepSize="1.0" />
 
@@ -108,10 +147,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/article_view_rating_bar"
-                android:layout_centerInParent="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="5dp"
                 android:text="Submit" />
         </RelativeLayout>
 
 
     </ScrollView>
-</LinearLayout>
+</RelativeLayout>

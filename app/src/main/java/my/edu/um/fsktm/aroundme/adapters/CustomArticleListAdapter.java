@@ -25,14 +25,16 @@ public class CustomArticleListAdapter extends ArrayAdapter<String> {
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
 
-        View rowView = inflater.inflate(R.layout.custom_articlelist, null, true);
+        if (view == null) {
+            view = inflater.inflate(R.layout.custom_articlelist, null, true);
+        }
 
-        TextView comment = (TextView) rowView.findViewById(R.id.article_comment);
-        ImageView commentImg = (ImageView) rowView.findViewById(R.id.article_img);
+        TextView comment = (TextView) view.findViewById(R.id.article_comment);
+        ImageView commentImg = (ImageView) view.findViewById(R.id.article_img);
 
         comment.setText(text[position]);
         commentImg.setImageResource(locationImg[position]);
-        return rowView;
+        return view;
 
     }
 }
