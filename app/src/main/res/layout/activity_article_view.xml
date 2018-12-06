@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ArticleViewActivity">
+
+    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/blue_grey_500"
+        android:elevation="4dp" />
+
+    <ScrollView
+        android:id="@+id/article_view_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/article_view_cover"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_launcher_foreground" />
+
+            <TextView
+                android:id="@+id/article_view_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/article_view_cover"
+                android:paddingLeft="20dp"
+                android:singleLine="true"
+                android:text="KLCC"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/article_view_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/article_view_title"
+                android:paddingBottom="10dp"
+                android:paddingLeft="20dp"
+                android:text="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+"
+                android:textSize="16sp" />
+
+            <fragment xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/article_view_map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_below="@+id/article_view_content"
+                tools:context=".MapsActivity" />
+
+            <ListView
+                android:id="@+id/article_view_list_view_reviews"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/article_view_map"
+                android:layout_centerInParent="true"
+                android:paddingLeft="20dp" />
+
+            <View
+                android:id="@+id/article_view_custom_view"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@android:color/transparent" />
+
+            <TextView
+                android:id="@+id/article_view_rate_me"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/article_view_list_view_reviews"
+                android:layout_centerInParent="true"
+                android:paddingTop="15dp"
+                android:text="Rate Me"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/article_view_review"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/article_view_rate_me"
+                android:layout_centerInParent="true"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="" />
+
+            <RatingBar
+                android:id="@+id/article_view_rating_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/article_view_review"
+                android:layout_centerInParent="true"
+                android:numStars="5"
+                android:stepSize="1.0" />
+
+            <Button
+                android:id="@+id/article_view_rating_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/article_view_rating_bar"
+                android:layout_centerInParent="true"
+                android:text="Submit" />
+        </RelativeLayout>
+
+
+    </ScrollView>
+</LinearLayout>

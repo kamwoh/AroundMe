@@ -30,6 +30,8 @@ public class SimpleArticleAdapter extends ArrayAdapter<SimpleArticle> {
         FirebaseStorage storage = FirebaseStorage.getInstance("gs://aroundme-e717d.appspot.com");
 
         storageRef = storage.getReference();
+
+        Log.d("SimpleArticleAdapter", "constructor");
     }
 
     @NonNull
@@ -56,7 +58,7 @@ public class SimpleArticleAdapter extends ArrayAdapter<SimpleArticle> {
 
         Bitmap bitmap = article.getBitmap(getContext());
 
-        Log.d("keep coming at:", "position " + position + "?????? bitmap " + String.valueOf(bitmap));
+        Log.d("SimpleArticleAdapter", "position " + position + "-> bitmap " + String.valueOf(bitmap));
 
         if (bitmap != null) {
             cover.setImageBitmap(bitmap);

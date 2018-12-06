@@ -76,6 +76,16 @@ public class Article {
 
     public Article(HashMap firebaseMap) {
         // construct variable
+        Log.d("firebase map", firebaseMap.toString());
+        tag = (String) firebaseMap.get("tag");
+        title = (String) firebaseMap.get("title");
+        description = (String) firebaseMap.get("description");
+        author = (String) firebaseMap.get("author");
+        cover = (String) firebaseMap.get("cover");
+
+
+        lat = (double) firebaseMap.get("lat");
+        lng = (double) firebaseMap.get("lng");
 
     }
 

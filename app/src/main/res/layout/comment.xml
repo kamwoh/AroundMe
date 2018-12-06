@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="10dp"
+    android:layout_weight="1">
+
+
+    <ImageView
+        android:id="@+id/comment_avatar"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/ic_launcher_foreground" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:paddingLeft="10dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="left">
+
+        <TextView
+            android:id="@+id/comment_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sina"
+            android:textStyle="bold"
+            android:gravity="left" />
+
+        <TextView
+            android:id="@+id/comment_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Beautiful beautiful beautiful beautiful angel"
+            android:gravity="left" />
+
+        <RatingBar
+            android:id="@+id/comment_rating_bar"
+            android:layout_width="wrap_content"
+            style="?android:attr/ratingBarStyleSmall"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:numStars="5" />
+    </LinearLayout>
+
+</LinearLayout>
+

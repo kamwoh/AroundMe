@@ -4,6 +4,7 @@ package my.edu.um.fsktm.aroundme.fragments;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -42,8 +43,11 @@ public class GPlusFragment extends Fragment {
     private GoogleSignInAccount account;
     private FirebaseDatabase firebaseDatabase;
     private FirebaseAuth auth;
+    private View layout;
+    private View progressBar;
     private static final int RC_SIGN_IN = 0;
     private boolean isSignOut = false; // to check whether this fragment should skip sign in page
+    private boolean displayedSigningIn = false;
 
     public GPlusFragment() {
         this(false);
@@ -83,8 +87,8 @@ public class GPlusFragment extends Fragment {
                     });
         } else {
             account = GoogleSignIn.getLastSignedInAccount(getActivity());
-
-            if (account != null) {
+            if (!displayedSigningIn) {
+                displayedSigningIn = true;
                 switchToHomeFragment();
             }
         }
@@ -106,6 +110,17 @@ public class GPlusFragment extends Fragment {
 
         });
 
+        layout = v.findViewById(R.id.gplus_layout);
+        progressBar = v.findViewById(R.id.listing_progress_bar_in_gplus);
+
+        if (account == null) {
+            layout.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
+        } else { // it has account
+            layout.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
         return v;
     }
 
@@ -123,8 +138,10 @@ public class GPlusFragment extends Fragment {
         // authenticate firebase
         final FragmentManager fm = getActivity().getSupportFragmentManager();
 
-        Log.d("id_token", account.getIdToken());
+        Toast.makeText(getActivity(), "Signing in", Toast.LENGTH_SHORT).show();
 
+        Log.d("GPlusFragment", String.valueOf(displayedSigningIn));
+        Log.d("GPlusFragment", "id_token: " + account.getIdToken());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         auth.signInWithCredential(credential)
@@ -136,11 +153,19 @@ public class GPlusFragment extends Fragment {
 
                             User.restoreOrPush(firebaseDatabase.getReference().child("users"), user, true);
 
-                            Fragment fragment = new HomeFragment();
-                            fm.beginTransaction()
-                                    .remove(GPlusFragment.this)
-                                    .replace(R.id.fragment_container, fragment)
-                                    .commit();
+                            User.currentUser = user;
+
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Fragment fragment = new HomeFragment();
+                                    progressBar.setVisibility(View.INVISIBLE);
+                                    fm.beginTransaction()
+                                            .remove(GPlusFragment.this)
+                                            .replace(R.id.fragment_container, fragment)
+                                            .commit();
+                                }
+                            }, 250);
                         } else {
                             Toast.makeText(getActivity(), R.string.sign_in_failed, Toast.LENGTH_SHORT).show();
                         }
@@ -159,6 +184,7 @@ public class GPlusFragment extends Fragment {
 
     public static void switchToGPlusFragment(FragmentManager fm, Fragment oldFragment, boolean isSignOut) {
         Fragment fragment = new GPlusFragment(isSignOut);
+        Log.d("GPlusFragment", "called twice " + isSignOut);
         FragmentTransaction ft = fm.beginTransaction();
 
         if (oldFragment != null)

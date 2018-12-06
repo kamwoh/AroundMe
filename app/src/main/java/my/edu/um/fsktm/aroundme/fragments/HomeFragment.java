@@ -28,6 +28,8 @@ import my.edu.um.fsktm.aroundme.R;
 public class HomeFragment extends Fragment {
 
 
+    private static boolean displayedWelcomeBack = false;
+
     public HomeFragment() {
     }
 
@@ -39,7 +41,7 @@ public class HomeFragment extends Fragment {
 
         switch (item.getItemId()) {
             case R.id.action_sign_out:
-                Log.d("signout", "signout");
+                Log.d("HomeFragment", "SignOut");
                 GPlusFragment.switchToGPlusFragment(fm, this, true);
                 return true;
             default:
@@ -51,7 +53,10 @@ public class HomeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Toast.makeText(getActivity(), "Welcome back", Toast.LENGTH_LONG).show();
+        if (!displayedWelcomeBack) {
+            Toast.makeText(getActivity(), "Welcome back", Toast.LENGTH_LONG).show();
+            displayedWelcomeBack = true;
+        }
 
         setHasOptionsMenu(true);
     }
@@ -67,7 +72,7 @@ public class HomeFragment extends Fragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        Log.i("hereee", "came hereee");
+        Log.d("HomeFragment", "onCreateView");
         View v = inflater.inflate(R.layout.fragment_home, container, false);
 
         LoginActivity loginActivity = (LoginActivity) getActivity();

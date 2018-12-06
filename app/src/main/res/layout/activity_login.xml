@@ -14,9 +14,8 @@
         android:elevation="4dp" />
 
 
-    <fragment
+    <FrameLayout
         android:id="@+id/fragment_container"
-        android:name="my.edu.um.fsktm.aroundme.fragments.GPlusFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

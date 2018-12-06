@@ -32,7 +32,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MyCollections" />
+        <activity
+            android:name=".MyCollections"
+            android:parentActivityName=".LoginActivity" />
+        <activity
+            android:name=".ArticleViewActivity"
+            android:parentActivityName=".LoginActivity" />
         <!--<activity android:name=".FragmentBookmarks" />-->
         <!--<activity android:name=".FragmentArticles" />-->
         <!--<activity android:name=".FragmentNotifications" />-->

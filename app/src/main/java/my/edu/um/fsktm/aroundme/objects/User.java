@@ -9,31 +9,28 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class User {
 
+    public static User currentUser;
+
+    public String userId;
     public String name;
     public ArrayList<String> posts;
     public ArrayList<String> bookmarks;
-    private String email;
 
     public User() {
     }
 
     public User(String email, String name) {
-        this.email = email;
+        this.userId = email;
         this.name = name;
         posts = new ArrayList<>();
         bookmarks = new ArrayList<>();
     }
 
-    public String getEmail() {
-        return email;
-    }
-
     public static void restoreOrPush(DatabaseReference usersRef, final User user, final boolean isLogin) {
-        final DatabaseReference userRef = usersRef.child(user.email.replace(".com", ""));
+        final DatabaseReference userRef = usersRef.child(user.userId);
 
         if (isLogin) {
             userRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -46,12 +43,26 @@ public class User {
 
                         if (map != null) {
                             if (map.containsKey("posts")) {
-                                List<String> posts = (List<String>) map.get("posts");
+                                HashMap<String, String> postsMap;
+                                postsMap = (HashMap<String, String>) map.get("posts");
+                                ArrayList<String> posts = new ArrayList<>();
+
+                                for (String key : postsMap.keySet()) {
+                                    posts.add(postsMap.get(key));
+                                }
+
                                 user.posts.addAll(posts);
                             }
 
                             if (map.containsKey("bookmarks")) {
-                                List<String> bookmarks = (List<String>) map.get("bookmarks");
+                                HashMap<String, String> bookmarksMap;
+                                bookmarksMap = (HashMap<String, String>) map.get("bookmarks");
+                                ArrayList<String> bookmarks = new ArrayList<>();
+
+                                for (String key : bookmarksMap.keySet()) {
+                                    bookmarks.add(bookmarksMap.get(key));
+                                }
+
                                 user.bookmarks.addAll(bookmarks);
                             }
                         }

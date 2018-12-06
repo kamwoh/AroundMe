@@ -13,6 +13,9 @@ import android.view.View;
 import my.edu.um.fsktm.aroundme.fragments.GPlusFragment;
 
 public class LoginActivity extends AppCompatActivity {
+
+    public final static int ARTICLE_VIEW = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

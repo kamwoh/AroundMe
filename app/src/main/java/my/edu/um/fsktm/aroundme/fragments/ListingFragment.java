@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -23,7 +24,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -33,16 +36,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlacePhotoMetadata;
 import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
 import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
 import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -63,12 +63,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import my.edu.um.fsktm.aroundme.ArticleViewActivity;
 import my.edu.um.fsktm.aroundme.LoginActivity;
 import my.edu.um.fsktm.aroundme.R;
 import my.edu.um.fsktm.aroundme.adapters.SimpleArticleAdapter;
 import my.edu.um.fsktm.aroundme.objects.Article;
 import my.edu.um.fsktm.aroundme.objects.PlaceTypes;
 import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
+
+import static my.edu.um.fsktm.aroundme.LoginActivity.ARTICLE_VIEW;
 
 
 /**
@@ -92,32 +95,15 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
     private String tag;
     private ListView listView;
+    private FrameLayout frameLayout;
+    private ProgressBar spinner;
+    private SimpleArticleAdapter adapter;
 
     private double lat, lng;
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
 
     public ListingFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(loginActivity, data);
-                Log.i("success yahoooo", "Place: " + place.getName());
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(loginActivity, data);
-                // TODO: Handle the error.
-                Log.i("cb error", status.getStatusMessage());
-
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                // The user canceled the operation.
-                Log.d("wtf why you cancel", "why you do this");
-            }
-        }
     }
 
     @Override
@@ -129,7 +115,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 GPlusFragment.switchToGPlusFragment(fm, this, true);
                 return true;
             case R.id.action_search:
-                Log.i("on search", "search");
+                Log.i("ListingFragment", "on search");
                 switchToSearchFragment();
                 return true;
             case android.R.id.home:
@@ -212,18 +198,18 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                                                 FileOutputStream fos = new FileOutputStream(localFile);
                                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                                             } catch (Exception e) {
-                                                Log.d("file not found", e.getMessage());
+                                                Log.d("ListingFragment", e.getMessage());
                                             }
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            Log.d("gg cannot load", "wtf message " + e.getMessage());
+                                            Log.d("ListingFragment", "cant load " + e.getMessage());
                                         }
                                     });
                         } else {
-                            Log.d("no google photo arhh", "buffer count " + buffer.getCount());
+                            Log.d("ListingFragment", "buffer count " + buffer.getCount());
                         }
 
                         buffer.release();
@@ -239,10 +225,8 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 null,
                 null);
 
-//        if (simpleArticles.size() < 20) {
         simpleArticles.add(article.toSimpleArticle());
         simpleArticleIds.add(article.articleId);
-//        }
 
         Log.d("request " + i, article.toString());
         Log.d("request " + i, result.toString());
@@ -276,14 +260,14 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                     updateAdapter();
                     listView.invalidate();
                 } catch (Exception e) {
-                    Log.e("error cb", e.getMessage());
+                    Log.e("ListingFragment", e.getMessage());
                     Toast.makeText(loginActivity, "Connection error", Toast.LENGTH_SHORT).show();
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("request cb", "failed 9 jor: ");
+                Log.d("ListingFragment", "failed 9 jor: ");
             }
         });
 
@@ -322,13 +306,13 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        Log.d("children item", String.valueOf(dataSnapshot.getChildrenCount()));
+                        Log.d("children item count", String.valueOf(dataSnapshot.getChildrenCount()));
 
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
                             loadFirebaseSimpleArticle(child);
                         }
 
-                        Log.d("how many?", "its fucking " + simpleArticles.size());
+                        Log.d("how many?", "is " + simpleArticles.size());
 
                         if (simpleArticles.size() < 30) {
                             RequestQueue queue = Volley.newRequestQueue(loginActivity);
@@ -365,10 +349,18 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         // Create the adapter to convert the array to views
         // Attach the adapter to a ListView
         listView = v.findViewById(R.id.simpleArticleList);
+        frameLayout = v.findViewById(R.id.listing_frame_layout);
+        spinner = v.findViewById(R.id.listing_progress_bar);
+
+        frameLayout.setVisibility(View.INVISIBLE);
+        spinner.setVisibility(View.VISIBLE);
 
         String title = getArguments().getString("title");
 
         loginActivity.getSupportActionBar().setTitle(title);
+
+        adapter = new SimpleArticleAdapter(getActivity(), simpleArticles);
+        listView.setAdapter(adapter);
 
         updateAdapter();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -379,10 +371,29 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 // extra: store as cache in sqlite
                 // pass detail into article view for display
                 Toast.makeText(getContext(), "onclick " + position, Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(loginActivity, ArticleViewActivity.class);
+                intent.putExtra("tag", tag);
+                intent.putExtra("articleId", simpleArticles.get(position).getArticleId());
+                startActivityForResult(intent, ARTICLE_VIEW);
             }
         });
 
         return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ARTICLE_VIEW && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                boolean signOut = data.getBooleanExtra("signOut", false);
+
+                if (signOut)
+                    GPlusFragment.switchToGPlusFragment(loginActivity.getSupportFragmentManager(), null, true);
+            }
+        }
     }
 
     @Override
@@ -392,7 +403,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     }
 
     private void updateAdapter() {
-
+        Log.d("ListingFragment", "updateAdapter");
         Collections.sort(simpleArticles, new Comparator<SimpleArticle>() {
             @Override
             public int compare(SimpleArticle o1, SimpleArticle o2) {
@@ -413,19 +424,28 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
                 double distance = distance1 - distance2;
 
-//                Log.d("distanceee", o1.title + " vs " + o2.title + " " + distance);
-
                 return (int) distance;
             }
         });
 
         if (simpleArticles.size() > 0) {
             int lastIndex = Math.min(simpleArticles.size(), 30);
-            simpleArticles = new ArrayList<>(simpleArticles.subList(0, lastIndex));
-        }
 
-        SimpleArticleAdapter adapter = new SimpleArticleAdapter(getActivity(), simpleArticles);
-        listView.setAdapter(adapter);
+            for (int i = lastIndex; i < simpleArticles.size(); i++) {
+                simpleArticles.remove(i);
+            }
+
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    frameLayout.setVisibility(View.VISIBLE);
+                    spinner.setVisibility(View.INVISIBLE);
+                }
+            }, 1000);
+
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private void switchToSearchFragment() {
