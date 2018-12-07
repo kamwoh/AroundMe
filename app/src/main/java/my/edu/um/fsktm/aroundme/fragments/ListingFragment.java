@@ -449,7 +449,8 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), ArticleEditActivity.class);
                 intent.putExtra("tag", tag);
-                startActivity(intent);
+                intent.putExtra("edit", false);
+                startActivityForResult(intent, ADD_NEW_PLACE);
             }
         };
     }

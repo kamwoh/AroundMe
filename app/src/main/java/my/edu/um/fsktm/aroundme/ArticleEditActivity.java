@@ -62,6 +62,7 @@ public class ArticleEditActivity extends AppCompatActivity {
     private boolean edit;
     private boolean blockTouch;
     private double averageRating;
+    private String articleId;
 
     // coe
     private final int PICK_IMAGE_REQUEST = 71;
@@ -70,6 +71,7 @@ public class ArticleEditActivity extends AppCompatActivity {
     // maps
     private GoogleMap map;
     private SupportMapFragment mapFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,19 +101,21 @@ public class ArticleEditActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.imgView);
 
-        progressBar = findViewById(R.id.progress_bar);
-        transparentScreen = findViewById(R.id.transparent_screen);
+//        progressBar = findViewById(R.id.progress_bar);
+//        transparentScreen = findViewById(R.id.transparent_screen);
 
-        progressBar.setVisibility(View.INVISIBLE);
-        transparentScreen.setVisibility(View.INVISIBLE);
+//        progressBar.setVisibility(View.INVISIBLE);
+//        transparentScreen.setVisibility(View.INVISIBLE);
         blockTouch = false;
+
+        setTitle("Add New Article");
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 blockTouch = true;
-                progressBar.setVisibility(View.VISIBLE);
-                transparentScreen.setVisibility(View.VISIBLE);
+//                progressBar.setVisibility(View.VISIBLE);
+//                transparentScreen.setVisibility(View.VISIBLE);
 
                 final String titleText = title.getText().toString();
                 final String descText = desc.getText().toString();
@@ -122,16 +126,25 @@ public class ArticleEditActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Description cannot be empty", Toast.LENGTH_SHORT).show();
                 } else if (placeLatLng == null) {
                     Toast.makeText(getApplicationContext(), "Location cannot be empty", Toast.LENGTH_SHORT).show();
-                } else if (filePath == null) {
+                } else if (currentBitmap == null) {
                     Toast.makeText(getApplicationContext(), "Image cannot be empty", Toast.LENGTH_SHORT).show();
                 } else {
                     HashMap<String, Object> map = new HashMap<>();
 
-                    final DatabaseReference newArticleRef = FirebaseDatabase.getInstance()
-                            .getReference()
-                            .child("articles")
-                            .child(tag)
-                            .push();
+                    final DatabaseReference newArticleRef;
+                    if (!edit) {
+                        newArticleRef = FirebaseDatabase.getInstance()
+                                .getReference()
+                                .child("articles")
+                                .child(tag)
+                                .push();
+                    } else {
+                        newArticleRef = FirebaseDatabase.getInstance()
+                                .getReference()
+                                .child("articles")
+                                .child(tag)
+                                .child(articleId);
+                    }
 
                     map.put("tag", tag);
                     map.put("articleId", newArticleRef.getKey());
@@ -146,13 +159,15 @@ public class ArticleEditActivity extends AppCompatActivity {
                     final Article article = new Article(map);
                     final SimpleArticle simpleArticle = article.toSimpleArticle();
 
-                    FirebaseDatabase.getInstance()
-                            .getReference()
-                            .child("users")
-                            .child(User.currentUser.userId)
-                            .child("posts")
-                            .push()
-                            .setValue(article.articleId);
+                    if (!edit) {
+                        FirebaseDatabase.getInstance()
+                                .getReference()
+                                .child("users")
+                                .child(User.currentUser.userId)
+                                .child("posts")
+                                .push()
+                                .setValue(article.articleId);
+                    }
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     currentBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -173,6 +188,7 @@ public class ArticleEditActivity extends AppCompatActivity {
                                                     Toast.makeText(getApplicationContext(), "You have added a new place!", Toast.LENGTH_SHORT).show();
                                                     Intent intent = new Intent();
                                                     intent.putExtra("articleId", newArticleRef.getKey());
+                                                    intent.putExtra("recreate", true);
                                                     setResult(RESULT_OK, intent);
                                                     finish();
                                                 }
@@ -190,8 +206,8 @@ public class ArticleEditActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     Toast.makeText(getApplicationContext(), "Upload failed, make sure you have internet!", Toast.LENGTH_SHORT).show();
-                                    progressBar.setVisibility(View.INVISIBLE);
-                                    transparentScreen.setVisibility(View.INVISIBLE);
+//                                    progressBar.setVisibility(View.INVISIBLE);
+//                                    transparentScreen.setVisibility(View.INVISIBLE);
                                 }
                             });
 
@@ -224,11 +240,13 @@ public class ArticleEditActivity extends AppCompatActivity {
         edit = getIntent().getBooleanExtra("edit", false);
 
         if (edit) {
-            final String articleId = getIntent().getStringExtra("articleId");
+            articleId = getIntent().getStringExtra("articleId");
+
+            setTitle("Edit Article");
 
             blockTouch = true;
-            progressBar.setVisibility(View.VISIBLE);
-            transparentScreen.setVisibility(View.VISIBLE);
+//            progressBar.setVisibility(View.VISIBLE);
+//            transparentScreen.setVisibility(View.VISIBLE);
 
             FirebaseDatabase.getInstance()
                     .getReference()
@@ -238,16 +256,17 @@ public class ArticleEditActivity extends AppCompatActivity {
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            final Article article = dataSnapshot.getValue(Article.class);
+                            final Article article = new Article((HashMap) dataSnapshot.getValue());
+                            final SimpleArticle simpleArticle = article.toSimpleArticle();
 
                             blockTouch = false;
                             title.setText(article.title);
                             desc.setText(article.description);
 
-                            article.toSimpleArticle().getBitmap(getApplicationContext(), new Runnable() {
+                            simpleArticle.getBitmap(getApplicationContext(), new Runnable() {
                                 @Override
                                 public void run() {
-                                    setImageView(article.toSimpleArticle().getBitmap(getApplicationContext()));
+                                    setImageView(simpleArticle.getBitmap(getApplicationContext()));
                                 }
                             });
 

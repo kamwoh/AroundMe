@@ -61,6 +61,7 @@ public class ArticleViewActivity extends AppCompatActivity {
     private boolean isAuthor;
     private Article article;
     private Menu menu;
+    private MenuItem editItem;
     private boolean isFavorite = false;
     private DatabaseReference articleRef;
     private GoogleMap googleMap;
@@ -236,6 +237,10 @@ public class ArticleViewActivity extends AppCompatActivity {
 
                 isAuthor = article.author.equals(user.userId);
 
+                if (isAuthor) {
+                    editItem.setVisible(true);
+                }
+
                 TextView title = findViewById(R.id.article_view_title);
                 TextView content = findViewById(R.id.article_view_content);
                 final ImageView cover = findViewById(R.id.article_view_cover);
@@ -292,8 +297,11 @@ public class ArticleViewActivity extends AppCompatActivity {
         Log.d("ArticleViewActivity", "onCreateOptionsMenu");
         Log.d("ArticleViewActivity", "menu is null " + menu);
         Log.d("ArticleViewActivity", "is favourite " + isFavorite);
+        Log.d("ArticleViewActivity", "is author " + isAuthor);
 
-        getMenuInflater().inflate(R.menu.top, menu);
+        getMenuInflater().inflate(R.menu.top_with_edit, menu);
+        editItem = menu.findItem(R.id.action_edit);
+        editItem.setVisible(false);
 
         this.menu = menu;
 
@@ -303,10 +311,29 @@ public class ArticleViewActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 0 && resultCode == RESULT_OK) {
+            if (data.getBooleanExtra("recreate", false)) {
+                Log.d("ArticleViewActivity", "recreate");
+                recreate();
+            }
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
                 // User chose the "Settings" item, show the app settings UI...
+                return true;
+            case R.id.action_edit:
+                Intent intent = new Intent(getApplicationContext(), ArticleEditActivity.class);
+                intent.putExtra("tag", tag);
+                intent.putExtra("edit", true);
+                intent.putExtra("articleId", articleId);
+                startActivityForResult(intent, 0);
                 return true;
 
             case R.id.action_favorite:
