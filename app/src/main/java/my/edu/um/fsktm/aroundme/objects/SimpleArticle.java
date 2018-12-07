@@ -17,6 +17,8 @@ import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,7 +55,7 @@ public class SimpleArticle implements Comparable<SimpleArticle> {
         noPhoto = false;
     }
 
-    private Bitmap createEmptyImage() {
+    public Bitmap createEmptyImage() {
         int width = 200, height = 200;
         int color = Color.TRANSPARENT;
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -64,20 +66,19 @@ public class SimpleArticle implements Comparable<SimpleArticle> {
         return bitmap;
     }
 
-    public Bitmap getBitmap(final Context context) {
+    public Bitmap getBitmap(final Context context, final Runnable callback) {
         if (bitmap != null)
             return bitmap;
 
         final File localFile = new File(context.getFilesDir(), "images/" + articleId + ".jpg");
         Log.d("localFile", String.valueOf(localFile) + " " + localFile.exists());
 
-        if (localFile.exists()) {
+        if (localFile.exists() && cover.contains("http")) {
             bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
             return bitmap;
         }
 
-        if (!noPhoto) { // to conlanfirm no photo
-            // search again first cb
+        if (!noPhoto && cover.contains("http")) { // to confirm no photo
             final GeoDataClient geoDataClient = Places.getGeoDataClient(context);
 
             geoDataClient.getPlacePhotos(articleId)
@@ -88,7 +89,6 @@ public class SimpleArticle implements Comparable<SimpleArticle> {
 
                             if (buffer.getCount() != 0) {
                                 PlacePhotoMetadata photoMetadata = buffer.get(0);
-                                final File localFile = new File(context.getFilesDir(), "images/" + articleId + ".jpg");
                                 localFile.getParentFile().mkdirs();
 
                                 geoDataClient.getPhoto(photoMetadata)
@@ -100,30 +100,54 @@ public class SimpleArticle implements Comparable<SimpleArticle> {
                                                     FileOutputStream fos = new FileOutputStream(localFile);
                                                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                                                     SimpleArticle.this.bitmap = bitmap;
+                                                    if (callback != null) {
+                                                        callback.run();
+                                                    }
                                                 } catch (Exception e) {
                                                     // impossible reach here actually but java wan me put this zzzz
-                                                    Log.d("file not found", e.getMessage());
+                                                    Log.d("SimpleArticle", e.getMessage());
                                                 }
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                noPhoto = true; // load fail = conlanfirm no photo
-                                                Log.d("gg cannot load", "wtf message " + e.getMessage());
+                                                noPhoto = true; // load fail = confirm no photo
+                                                Log.d("SimpleArticle", " " + e.getMessage());
                                             }
                                         });
                             } else {
-                                noPhoto = true; // this is fk shit google no photo!!!!!
-                                Log.d("no google photo arhh", "buffer count " + buffer.getCount());
+                                noPhoto = true; // this is google no photo!!!!!
+                                Log.d("SimpleArticle", "buffer count " + buffer.getCount());
                             }
 
                             buffer.release();
                         }
                     });
+        } else if (!noPhoto && cover.length() != 0) {
+            localFile.getParentFile().mkdirs();
+            FirebaseStorage.getInstance()
+                    .getReferenceFromUrl("gs://aroundme-e717d.appspot.com")
+                    .child(cover)
+                    .getFile(localFile)
+                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Log.d("SimpleArticle", "Download from firebase done!");
+                            bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                            Log.d("SimpleArticle", "bitmap reference " + String.valueOf(bitmap));
+                            if (callback != null) {
+                                callback.run();
+                            }
+                        }
+                    });
         }
 
         return createEmptyImage();
+    }
+
+    public Bitmap getBitmap(final Context context) {
+        return getBitmap(context, null);
     }
 
     @Override

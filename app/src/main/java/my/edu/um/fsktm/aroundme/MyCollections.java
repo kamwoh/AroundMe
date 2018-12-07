@@ -55,7 +55,7 @@ public class MyCollections extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_collections);
-        toolbar = (Toolbar) findViewById(R.id.MyCollectionsTB);
+        toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -65,7 +65,7 @@ public class MyCollections extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
 
-        highLightCurrentTab(0);
+        highLightCurrentTab(0, true);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -74,7 +74,7 @@ public class MyCollections extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                highLightCurrentTab(position);
+                highLightCurrentTab(position, false);
             }
 
             @Override
@@ -87,12 +87,14 @@ public class MyCollections extends AppCompatActivity {
     }
 
 
-    private void highLightCurrentTab(int position) {
-        for (int i = 0; i < tabLayout.getTabCount(); i++) {
-            TabLayout.Tab tab = tabLayout.getTabAt(i);
-            assert tab != null;
-            tab.setCustomView(null);
-            tab.setCustomView(adapter.getTabView(i));
+    private void highLightCurrentTab(int position, boolean init) {
+        if (init) {
+            for (int i = 0; i < tabLayout.getTabCount(); i++) {
+                TabLayout.Tab tab = tabLayout.getTabAt(i);
+                assert tab != null;
+                tab.setCustomView(null);
+                tab.setCustomView(adapter.getTabView(i));
+            }
         }
 
         TabLayout.Tab tab = tabLayout.getTabAt(position);
@@ -112,6 +114,7 @@ public class MyCollections extends AppCompatActivity {
         adapter.addFragment(new FragmentBookmarks(), "Bookmarks", tabIcons[0]);
         adapter.addFragment(new FragmentArticles(), "Articles", tabIcons[1]);
         adapter.addFragment(new FragmentNotifications(), "Notifications", tabIcons[2]);
+
     }
 
 

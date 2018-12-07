@@ -9,6 +9,24 @@ public class Comment {
     public String userName;
 
     private String commentId;
+    private String tag;
+    private String articleId;
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public void setArticleId(String articleId) {
+        this.articleId = articleId;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public String getArticleId() {
+        return articleId;
+    }
 
     public Comment() {
     }

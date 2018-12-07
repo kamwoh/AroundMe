@@ -87,7 +87,7 @@ public class GPlusFragment extends Fragment {
                     });
         } else {
             account = GoogleSignIn.getLastSignedInAccount(getActivity());
-            if (!displayedSigningIn) {
+            if (account != null && !displayedSigningIn) {
                 displayedSigningIn = true;
                 switchToHomeFragment();
             }
@@ -165,7 +165,7 @@ public class GPlusFragment extends Fragment {
                                             .replace(R.id.fragment_container, fragment)
                                             .commit();
                                 }
-                            }, 250);
+                            }, 100);
                         } else {
                             Toast.makeText(getActivity(), R.string.sign_in_failed, Toast.LENGTH_SHORT).show();
                         }
@@ -176,6 +176,8 @@ public class GPlusFragment extends Fragment {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             account = completedTask.getResult(ApiException.class);
+            layout.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             switchToHomeFragment();
         } catch (ApiException e) {
             Toast.makeText(getActivity(), R.string.sign_in_failed, Toast.LENGTH_LONG).show();

@@ -1,8 +1,6 @@
 package my.edu.um.fsktm.aroundme.objects;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -15,7 +13,6 @@ import com.google.firebase.database.DatabaseReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -83,11 +80,29 @@ public class Article {
         description = (String) firebaseMap.get("description");
         author = (String) firebaseMap.get("author");
         cover = (String) firebaseMap.get("cover");
-
+        try {
+            averageRating = (Double) firebaseMap.get("averageRating");
+        } catch (Exception e) {
+            averageRating = (Long) firebaseMap.get("averageRating");
+        }
 
         lat = (double) firebaseMap.get("lat");
         lng = (double) firebaseMap.get("lng");
 
+//        if (firebaseMap.containsKey("comments")) { // not necessary as article view has a firebase controller already
+//            HashMap<String, Object> commentsMap = (HashMap<String, Object>) firebaseMap.get("comments");
+//            for (String key : commentsMap.keySet()) {
+//                HashMap<String, Object> comment = (HashMap<String, Object>) commentsMap.get(key);
+//                Comment cm = new Comment(key,
+//                        comment.get("userId").toString(),
+//                        comment.get("userName").toString(),
+//                        ((Long) comment.get("rating")).doubleValue(),
+//                        comment.get("comment").toString());
+//                comments.add(cm);
+//            }
+//        }
+
+        fromFirebase = true;
     }
 
     public String toString() {
@@ -140,20 +155,5 @@ public class Article {
         paint.setColor(color);
         canvas.drawRect(0F, 0F, (float) width, (float) height, paint);
         return bitmap;
-    }
-
-    public Bitmap getBitmap(Context context) {
-        if (bitmap != null)
-            return bitmap;
-
-        final File localFile = new File(context.getFilesDir(), "images/" + articleId + ".jpg");
-        Log.d("localFile", String.valueOf(localFile) + " " + localFile.exists());
-
-        if (localFile.exists()) {
-            bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-            return bitmap;
-        }
-
-        return createEmptyImage();
     }
 }

@@ -23,17 +23,23 @@ public class CustomListAdapter extends ArrayAdapter<SimpleArticle> {
         this.list = simpleArticleArrayList;
     }
 
-    public View getView(int position, View view, ViewGroup parent) {
+    public View getView(final int position, View view, ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
 
         if (view == null) {
             view = inflater.inflate(R.layout.custom_bookmarklist, null, true);
         }
 
-        ImageView img = (ImageView) view.findViewById(R.id.bookmark_img);
+        final ImageView img = (ImageView) view.findViewById(R.id.bookmark_img);
         TextView location = (TextView) view.findViewById(R.id.bookmark_location);
 
-        img.setImageBitmap(list.get(position).getBitmap(getContext()));
+        img.setImageBitmap(list.get(position).getBitmap(getContext(), new Runnable() {
+            @Override
+            public void run() {
+                img.setImageBitmap(list.get(position).getBitmap(getContext()));
+            }
+        }));
+
         location.setText(list.get(position).title);
 
         return view;

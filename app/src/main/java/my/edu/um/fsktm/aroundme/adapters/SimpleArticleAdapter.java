@@ -36,33 +36,34 @@ public class SimpleArticleAdapter extends ArrayAdapter<SimpleArticle> {
 
     @NonNull
     @Override
-    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+    public View getView(final int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_simple_article, parent, false);
         }
 
-        SimpleArticle article = getItem(position);
+        final SimpleArticle simpleArticle = getItem(position);
 
-        if (article == null)
+        if (simpleArticle == null)
             return convertView;
 
         // Lookup view for data population
         TextView title = convertView.findViewById(R.id.simpleArticleTitle);
-        title.setText(article.title);
+        title.setText(simpleArticle.title);
 
-        ImageView cover = convertView.findViewById(R.id.simpleArticleImage);
+        final ImageView cover = convertView.findViewById(R.id.simpleArticleImage);
 
         RatingBar ratingBar = convertView.findViewById(R.id.simpleRating);
-        ratingBar.setRating(article.rating.floatValue());
+        ratingBar.setRating(simpleArticle.rating.floatValue());
 
-        Bitmap bitmap = article.getBitmap(getContext());
-
-        Log.d("SimpleArticleAdapter", "position " + position + "-> bitmap " + String.valueOf(bitmap));
-
-        if (bitmap != null) {
-            cover.setImageBitmap(bitmap);
-        }
+        cover.setImageBitmap(simpleArticle.getBitmap(getContext(), new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bitmap = simpleArticle.getBitmap(getContext());
+                Log.d("SimpleArticleAdapter", "position " + position + "-> bitmap " + String.valueOf(bitmap));
+                cover.setImageBitmap(bitmap);
+            }
+        }));
 
         // Return the completed view to render on screen
         return convertView;

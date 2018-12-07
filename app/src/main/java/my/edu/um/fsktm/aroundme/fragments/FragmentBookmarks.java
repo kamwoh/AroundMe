@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,9 +30,22 @@ public class FragmentBookmarks extends Fragment {
     ListView list;
     ArrayList<SimpleArticle> simpleArticles;
 
+    private ProgressBar progressBar;
+    private TextView indicator;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_fragment_bookmarks, container, false);
+        View v = inflater.inflate(R.layout.activity_fragment_bookmarks, container, false);
+
+        progressBar = v.findViewById(R.id.progress_bar);
+        indicator = v.findViewById(R.id.no_item_text_view);
+        list = v.findViewById(R.id.bookmark_list);
+
+        progressBar.setVisibility(View.VISIBLE);
+        indicator.setVisibility(View.INVISIBLE);
+        list.setVisibility(View.INVISIBLE);
+
+        return v;
     }
 
     @Override
@@ -74,6 +89,14 @@ public class FragmentBookmarks extends Fragment {
                         }
 
                         adapter.notifyDataSetChanged();
+
+                        progressBar.setVisibility(View.INVISIBLE);
+
+                        if (adapter.getCount() == 0) {
+                            indicator.setVisibility(View.VISIBLE);
+                        } else {
+                            list.setVisibility(View.VISIBLE);
+                        }
                     }
 
                     @Override
@@ -82,7 +105,6 @@ public class FragmentBookmarks extends Fragment {
                     }
                 });
 
-        list = (ListView) getActivity().findViewById(R.id.bookmark_list);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

@@ -7,14 +7,12 @@
     android:orientation="vertical"
     tools:context=".MyCollections">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/MyCollectionsTB"
+    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorWhite"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        android:layout_height="wrap_content"
+        android:background="@color/blue_grey_500"
+        android:elevation="4dp" />
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tabLayout"

@@ -1,6 +1,8 @@
 package my.edu.um.fsktm.aroundme;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,7 +25,14 @@ import android.widget.RatingBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
@@ -39,6 +48,7 @@ import java.util.HashMap;
 import my.edu.um.fsktm.aroundme.adapters.CommentsListAdapter;
 import my.edu.um.fsktm.aroundme.objects.Article;
 import my.edu.um.fsktm.aroundme.objects.Comment;
+import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
 import my.edu.um.fsktm.aroundme.objects.User;
 
 
@@ -48,17 +58,32 @@ public class ArticleViewActivity extends AppCompatActivity {
     private User user;
     private String tag;
     private String articleId;
+    private boolean isAuthor;
+    private Article article;
     private Menu menu;
     private boolean isFavorite = false;
     private DatabaseReference articleRef;
+    private GoogleMap googleMap;
+    private LatLng latLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_article_view);
 
         user = User.currentUser;
         tag = getIntent().getExtras().getString("tag");
         articleId = getIntent().getExtras().getString("articleId");
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.article_view_map);
+        Log.d("ArticleViewActivity", getSupportFragmentManager().getFragments().toString());
+        Log.d("ArticleViewActivity", String.valueOf(mapFragment));
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                ArticleViewActivity.this.googleMap = googleMap;
+            }
+        });
 
         FirebaseDatabase.getInstance()
                 .getReference()
@@ -89,7 +114,6 @@ public class ArticleViewActivity extends AppCompatActivity {
                     }
                 });
 
-        setContentView(R.layout.activity_article_view);
 
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -203,13 +227,21 @@ public class ArticleViewActivity extends AppCompatActivity {
 
 
         articleRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @SuppressLint("MissingPermission")
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Article article = new Article((HashMap) dataSnapshot.getValue());
+                Log.d("ArticleViewActivity", "articleRef " + dataSnapshot.getKey());
+                final Article article = new Article((HashMap) dataSnapshot.getValue());
+                ArticleViewActivity.this.article = article;
+
+                isAuthor = article.author.equals(user.userId);
 
                 TextView title = findViewById(R.id.article_view_title);
                 TextView content = findViewById(R.id.article_view_content);
-                ImageView cover = findViewById(R.id.article_view_cover);
+                final ImageView cover = findViewById(R.id.article_view_cover);
+                final SimpleArticle simpleArticle = article.toSimpleArticle();
+
+                getSupportActionBar().setTitle(article.title);
 
                 title.setText(article.title);
 
@@ -219,7 +251,30 @@ public class ArticleViewActivity extends AppCompatActivity {
                     text = "No description.";
 
                 content.setText(text);
-                cover.setImageBitmap(article.getBitmap(getApplicationContext()));
+
+                cover.setImageBitmap(simpleArticle.getBitmap(getApplicationContext(), new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("ArticleViewActivity", "Set bitmap cover");
+                        Bitmap bitmap = simpleArticle.getBitmap(getApplicationContext());
+                        Log.d("ArticleViewActivity", "bitmap reference " + bitmap);
+                        cover.setImageBitmap(bitmap);
+                    }
+                }));
+
+                if (googleMap != null) { // not sure which one will ready first
+                    latLng = new LatLng(article.lat, article.lng);
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(latLng);
+                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+
+                    googleMap.getUiSettings().setZoomControlsEnabled(true);
+                    googleMap.getUiSettings().setZoomGesturesEnabled(true);
+                    googleMap.setMyLocationEnabled(true);
+                    googleMap.addMarker(markerOptions);
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+                }
 
                 scrollViewParent.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);

@@ -1,6 +1,8 @@
 package my.edu.um.fsktm.aroundme.fragments;
 
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -26,7 +29,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import my.edu.um.fsktm.aroundme.ArticleViewActivity;
 import my.edu.um.fsktm.aroundme.LoginActivity;
 import my.edu.um.fsktm.aroundme.R;
 import my.edu.um.fsktm.aroundme.adapters.SimpleArticleAdapter;
@@ -44,32 +49,33 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
     private EditText searchBar;
     private ImageButton searchButton;
     private ListView resultList;
+    private HashMap<String, String> storeTag;
     private ArrayList<SimpleArticle> results;
 
     public SearchFragment() {
         // Required empty public constructor
     }
 
-    private void searchForTag(final String keyword, String tag) {
+    private void searchForTag(final String keyword, final String tag) {
 //        Toast.makeText(loginActivity, "serachhh " + tag, Toast.LENGTH_SHORT).show();
         simpleTagRef = FirebaseDatabase.getInstance().getReference().child("simple_articles/" + tag);
 
         simpleTagRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.d("firebase key", dataSnapshot.getKey());
+                Log.d("SearchFragment", dataSnapshot.getKey());
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     for (String word : keyword.split(" ")) {
                         SimpleArticle simpleArticle = child.getValue(SimpleArticle.class);
                         if (simpleArticle != null && (simpleArticle.title + " " + simpleArticle.keyword).toLowerCase().contains(word.toLowerCase())) {
                             results.add(simpleArticle);
+                            storeTag.put(simpleArticle.getArticleId(), tag);
                             break;
                         }
                     }
                 }
 
-                Log.d("array list cb", results.toString());
-//                Toast.makeText(loginActivity, "foodddddddddddddd", Toast.LENGTH_SHORT).show();
+                Log.d("SearchFragment", results.toString());
                 SimpleArticleAdapter adapter = new SimpleArticleAdapter(loginActivity, results);
                 resultList.setAdapter(adapter);
                 resultList.invalidate();
@@ -85,10 +91,11 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
     public void onSearch() {
         String keyword = searchBar.getText().toString();
 
-        Log.d("on click ciba", "yesssss");
-        Log.d("cibai keyword", keyword + " tag " + tag);
+        Log.d("SearchFragment", "yesssss");
+        Log.d("SearchFragment", keyword + " tag " + tag);
 
         results = new ArrayList<>();
+        storeTag = new HashMap<>();
 
         if (tag.length() != 0) {
             searchForTag(keyword, tag);
@@ -160,6 +167,20 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
         });
 
         resultList = v.findViewById(R.id.fragment_search_list_view);
+        resultList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SimpleArticle simpleArticle = results.get(position);
+
+                if (simpleArticle != null) {
+                    Intent intent = new Intent(getActivity(), ArticleViewActivity.class);
+                    intent.putExtra("tag", storeTag.get(simpleArticle.getArticleId()));
+                    intent.putExtra("articleId", simpleArticle.getArticleId());
+
+                    startActivityForResult(intent, 0);
+                }
+            }
+        });
 
         return v;
     }
@@ -177,4 +198,17 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                boolean signOut = data.getBooleanExtra("signOut", false);
+
+                if (signOut)
+                    GPlusFragment.switchToGPlusFragment(loginActivity.getSupportFragmentManager(), null, true);
+            }
+        }
+    }
 }

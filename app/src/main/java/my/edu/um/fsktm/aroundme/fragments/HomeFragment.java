@@ -45,6 +45,7 @@ public class HomeFragment extends Fragment {
                 return true;
             case R.id.action_sign_out:
                 Log.d("HomeFragment", "SignOut");
+                displayedWelcomeBack = false;
                 GPlusFragment.switchToGPlusFragment(fm, this, true);
                 return true;
             default:
@@ -187,8 +188,10 @@ public class HomeFragment extends Fragment {
             if (data != null) {
                 boolean signOut = data.getBooleanExtra("signOut", false);
 
-                if (signOut)
+                if (signOut) {
+                    displayedWelcomeBack = false;
                     GPlusFragment.switchToGPlusFragment(getActivity().getSupportFragmentManager(), this, true);
+                }
             }
         }
     }

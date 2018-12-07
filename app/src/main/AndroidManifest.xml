@@ -38,9 +38,10 @@
         <activity
             android:name=".ArticleViewActivity"
             android:parentActivityName=".LoginActivity" />
-        <!--<activity android:name=".FragmentBookmarks" />-->
-        <!--<activity android:name=".FragmentArticles" />-->
-        <!--<activity android:name=".FragmentNotifications" />-->
+        <!-- <activity android:name=".FragmentBookmarks" /> -->
+        <!-- <activity android:name=".FragmentArticles" /> -->
+        <!-- <activity android:name=".FragmentNotifications" /> -->
+        <activity android:name=".ArticleEditActivity"></activity>
     </application>
 
 </manifest>

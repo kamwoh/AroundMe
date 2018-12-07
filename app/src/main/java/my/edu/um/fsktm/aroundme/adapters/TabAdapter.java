@@ -7,15 +7,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import my.edu.um.fsktm.aroundme.R;
+import my.edu.um.fsktm.aroundme.fragments.FragmentNotifications;
+import my.edu.um.fsktm.aroundme.objects.User;
 
 public class TabAdapter extends FragmentStatePagerAdapter {
     private final List<Fragment> mFragmentList = new ArrayList<>();
@@ -57,10 +62,24 @@ public class TabAdapter extends FragmentStatePagerAdapter {
         tabTextView.setText(mFragmentTitleList.get(position));
         ImageView tabImageView = view.findViewById(R.id.tabImageView);
         tabImageView.setImageResource(mFragmentIconList.get(position));
+        Log.d("TabAdapter", "getTabView " + position);
         return view;
     }
 
     public View getSelectedTabView(int position) {
+        Log.d("TabAdapter", "getSelectedTabView " + position);
+        if (position == 2) {
+            // clear notification count
+            FirebaseDatabase.getInstance()
+                    .getReference()
+                    .child("users")
+                    .child(User.currentUser.userId)
+                    .child("notifications")
+                    .setValue(0);
+
+            ((FragmentNotifications) getItem(position)).notifyChanged();
+        }
+
         View view = LayoutInflater.from(context).inflate(R.layout.custom_tab, null);
         TextView tabTextView = view.findViewById(R.id.tabTextView);
         tabTextView.setText(mFragmentTitleList.get(position));

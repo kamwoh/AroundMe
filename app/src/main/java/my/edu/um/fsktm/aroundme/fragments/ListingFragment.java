@@ -6,13 +6,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -38,13 +38,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlacePhotoMetadata;
-import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
-import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
-import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -57,12 +51,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import my.edu.um.fsktm.aroundme.ArticleEditActivity;
 import my.edu.um.fsktm.aroundme.ArticleViewActivity;
 import my.edu.um.fsktm.aroundme.LoginActivity;
 import my.edu.um.fsktm.aroundme.R;
@@ -99,8 +92,8 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     private ProgressBar spinner;
     private SimpleArticleAdapter adapter;
 
-    private double lat, lng;
-    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    public static double lat, lng;
+    private final int ADD_NEW_PLACE = 12;
 
     public ListingFragment() {
         // Required empty public constructor
@@ -129,6 +122,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     private boolean checkPermissionAndLocations() {
         if (ActivityCompat.checkSelfPermission(loginActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(loginActivity, "permission blocked", Toast.LENGTH_SHORT).show();
+            loginActivity.getSupportFragmentManager().popBackStack();
             return false;
         }
 
@@ -136,6 +130,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
         if (lm == null) {
             Toast.makeText(loginActivity, "please turn on gps and restart", Toast.LENGTH_SHORT).show();
+            loginActivity.getSupportFragmentManager().popBackStack();
             return false;
         }
 
@@ -143,6 +138,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
         if (location == null) {
             Toast.makeText(loginActivity, "please turn on gps and restart", Toast.LENGTH_SHORT).show();
+            loginActivity.getSupportFragmentManager().popBackStack();
             return false;
         }
 
@@ -177,44 +173,6 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
         if (simpleArticleIds.contains(article.articleId))
             return;
-
-        geoDataClient.getPlacePhotos(article.articleId)
-                .addOnSuccessListener(new OnSuccessListener<PlacePhotoMetadataResponse>() {
-                    @Override
-                    public void onSuccess(PlacePhotoMetadataResponse placePhotoMetadataResponse) {
-                        PlacePhotoMetadataBuffer buffer = placePhotoMetadataResponse.getPhotoMetadata();
-
-                        if (buffer.getCount() != 0) {
-                            PlacePhotoMetadata photoMetadata = buffer.get(0);
-                            final File localFile = new File(loginActivity.getFilesDir(), "images/" + article.articleId + ".jpg");
-                            localFile.getParentFile().mkdirs();
-
-                            geoDataClient.getPhoto(photoMetadata)
-                                    .addOnSuccessListener(new OnSuccessListener<PlacePhotoResponse>() {
-                                        @Override
-                                        public void onSuccess(PlacePhotoResponse placePhotoResponse) {
-                                            try {
-                                                Bitmap bitmap = placePhotoResponse.getBitmap();
-                                                FileOutputStream fos = new FileOutputStream(localFile);
-                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                                            } catch (Exception e) {
-                                                Log.d("ListingFragment", e.getMessage());
-                                            }
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.d("ListingFragment", "cant load " + e.getMessage());
-                                        }
-                                    });
-                        } else {
-                            Log.d("ListingFragment", "buffer count " + buffer.getCount());
-                        }
-
-                        buffer.release();
-                    }
-                });
 
         article.constructCoverUrl(getString(R.string.google_maps_key));
 
@@ -299,8 +257,10 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         geoDataClient = Places.getGeoDataClient(loginActivity);
         placeDetectionClient = Places.getPlaceDetectionClient(loginActivity);
 
-        simpleArticles = new ArrayList<>();
-        simpleArticleIds = new ArrayList<>();
+        if (simpleArticles == null) {
+            simpleArticles = new ArrayList<>();
+            simpleArticleIds = new ArrayList<>();
+        }
 
         simpleTagRef
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -359,8 +319,16 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
         loginActivity.getSupportActionBar().setTitle(title);
 
+        if (simpleArticles == null) {
+            simpleArticles = new ArrayList<>();
+            simpleArticleIds = new ArrayList<>();
+        }
+
         adapter = new SimpleArticleAdapter(getActivity(), simpleArticles);
         listView.setAdapter(adapter);
+
+        FloatingActionButton fab = v.findViewById(R.id.fab);
+        fab.setOnClickListener(floatingButtonOnClick());
 
         updateAdapter();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -392,6 +360,18 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
                 if (signOut)
                     GPlusFragment.switchToGPlusFragment(loginActivity.getSupportFragmentManager(), null, true);
+            }
+        }
+
+        if (requestCode == ADD_NEW_PLACE && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                String articleId = data.getStringExtra("articleId");
+                if (articleId != null) {
+                    Intent intent = new Intent(loginActivity, ArticleViewActivity.class);
+                    intent.putExtra("tag", tag);
+                    intent.putExtra("articleId", articleId);
+                    startActivityForResult(intent, ARTICLE_VIEW);
+                }
             }
         }
     }
@@ -461,6 +441,17 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null) // return to previous page
                 .commit();
+    }
+
+    private View.OnClickListener floatingButtonOnClick() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), ArticleEditActivity.class);
+                intent.putExtra("tag", tag);
+                startActivity(intent);
+            }
+        };
     }
 
 }
