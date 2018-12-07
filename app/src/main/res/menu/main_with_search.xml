@@ -6,7 +6,7 @@
         android:id="@+id/action_search"
         android:title="Search"
         android:orderInCategory="100"
-        android:icon="@drawable/baseline_search_black_18dp"
+        android:icon="@drawable/search"
         app:showAsAction="always" />
 
     <item

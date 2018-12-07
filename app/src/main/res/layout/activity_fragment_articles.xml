@@ -5,6 +5,13 @@
     android:layout_height="match_parent"
     tools:context=".fragments.FragmentArticles">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:alpha="0.1"
+        android:src="@drawable/menu" />
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleLarge"

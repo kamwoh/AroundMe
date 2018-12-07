@@ -95,12 +95,12 @@ public class HomeFragment extends Fragment {
         };
 
         int[] drawableIds = {
-                R.drawable.baseline_fastfood_black_18dp,
-                R.drawable.baseline_local_see_black_18dp,
-                R.drawable.baseline_directions_bus_black_18dp,
-                R.drawable.baseline_hotel_black_18dp,
+                R.drawable.fast_food,
+                R.drawable.camera,
+                R.drawable.train,
+                R.drawable.bed,
                 R.drawable.baseline_collections_bookmark_black_18dp,
-                R.drawable.baseline_search_black_18dp
+                R.drawable.magnifier_tool
         };
 
         for (int i = 0; i < buttonIds.length; i++) {
