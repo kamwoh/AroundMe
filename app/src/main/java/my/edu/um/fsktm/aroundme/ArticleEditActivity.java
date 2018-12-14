@@ -64,8 +64,9 @@ public class ArticleEditActivity extends AppCompatActivity {
     private String articleId;
 
     // coe
-    private final int PICK_IMAGE_REQUEST = 71;
-    private final int PLACE_PICKER_REQUEST = 1;
+    private static final int REQUEST_CAPTURE_IMAGE = 123;
+    private static final int PICK_IMAGE_REQUEST = 71;
+    private static final int PLACE_PICKER_REQUEST = 1;
 
     // maps
     private GoogleMap map;
@@ -285,10 +286,17 @@ public class ArticleEditActivity extends AppCompatActivity {
     }
 
     private void chooseImage() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent,
+                    REQUEST_CAPTURE_IMAGE);
+        }
+
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
     private void setImageView(Bitmap bitmap) {
@@ -339,6 +347,12 @@ public class ArticleEditActivity extends AppCompatActivity {
         if (requestCode == PLACE_PICKER_REQUEST && resultCode == RESULT_OK) {
             Place place = PlacePicker.getPlace(this, data);
             setMap(place.getLatLng());
+        }
+
+        if (requestCode == REQUEST_CAPTURE_IMAGE && resultCode == RESULT_OK
+                && data != null && data.getExtras() != null) {
+            Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
+            setImageView(imageBitmap);
         }
     }
 }

@@ -10,10 +10,10 @@
         app:showAsAction="ifRoom" />
 
     <!-- Settings, should always be in the overflow -->
-    <item
-        android:id="@+id/action_settings"
-        android:title="Settings"
-        app:showAsAction="never" />
+    <!--<item-->
+    <!--android:id="@+id/action_settings"-->
+    <!--android:title="Settings"-->
+    <!--app:showAsAction="never" />-->
 
     <item
         android:id="@+id/action_sign_out"
