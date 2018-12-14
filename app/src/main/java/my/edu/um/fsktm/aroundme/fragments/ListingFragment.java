@@ -205,7 +205,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         currLocation.setLatitude(lat);
         currLocation.setLongitude(lng);
 
-        if (childLocation.distanceTo(currLocation) < 3000) {
+        if (childLocation.distanceTo(currLocation) < 4000) {
             articles.add(article);
             articleIds.add(article.articleId);
         }

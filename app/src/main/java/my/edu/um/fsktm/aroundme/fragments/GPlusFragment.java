@@ -50,6 +50,7 @@ public class GPlusFragment extends Fragment {
     private static final int RC_SIGN_IN = 0;
     private boolean isSignOut = false; // to check whether this fragment should skip sign in page
     private boolean displayedSigningIn = false;
+    private boolean reSignIn = false;
 
     public GPlusFragment() {
         this(false);
@@ -153,6 +154,7 @@ public class GPlusFragment extends Fragment {
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d("Test", "login get result" + task.getResult());
                         if (task.isSuccessful()) {
                             User user = new User(account.getId(), account.getDisplayName());
 
@@ -173,7 +175,16 @@ public class GPlusFragment extends Fragment {
                                 }
                             }, 100);
                         } else {
-                            Toast.makeText(getActivity(), R.string.sign_in_failed, Toast.LENGTH_SHORT).show();
+                            if (!reSignIn) {
+                                reSignIn = true;
+                                Log.d("GPlusFragment", "signed in failed: " + task.getException().getMessage());
+                                handleSignInResult(googleSignInClient.silentSignIn());
+                            } else { // still failed
+                                Log.d("GPlusFragment", "still failed: " + task.getException().getMessage());
+                                layout.setVisibility(View.VISIBLE);
+                                progressBar.setVisibility(View.INVISIBLE);
+                                background.setAlpha(0.9f);
+                            }
                         }
                     }
                 });
