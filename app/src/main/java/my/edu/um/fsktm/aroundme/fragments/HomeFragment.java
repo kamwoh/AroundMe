@@ -41,8 +41,8 @@ public class HomeFragment extends Fragment {
         FragmentManager fm = getActivity().getSupportFragmentManager();
 
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                return true;
+//            case R.id.action_settings:
+//                return true;
             case R.id.action_sign_out:
                 Log.d("HomeFragment", "SignOut");
                 displayedWelcomeBack = false;
