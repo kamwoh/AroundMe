@@ -106,12 +106,6 @@
                 android:layout_height="wrap_content"
                 android:text="Set Location" />
 
-            <Button
-                android:id="@+id/addImage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Add Photo" />
-
             <ImageView
                 android:id="@+id/imgView"
                 android:layout_width="match_parent"
@@ -119,6 +113,12 @@
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
                 android:layout_gravity="center_horizontal" />
+
+            <Button
+                android:id="@+id/addImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add Photo" />
 
             <Button
                 android:id="@+id/submit"

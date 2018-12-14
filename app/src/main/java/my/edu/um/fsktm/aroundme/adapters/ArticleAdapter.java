@@ -18,20 +18,20 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 
 import my.edu.um.fsktm.aroundme.R;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
+import my.edu.um.fsktm.aroundme.objects.Article;
 
-public class SimpleArticleAdapter extends ArrayAdapter<SimpleArticle> {
+public class ArticleAdapter extends ArrayAdapter<Article> {
 
     private StorageReference storageRef;
 
-    public SimpleArticleAdapter(Context context, ArrayList<SimpleArticle> list) {
+    public ArticleAdapter(Context context, ArrayList<Article> list) {
         super(context, 0, list);
 
         FirebaseStorage storage = FirebaseStorage.getInstance("gs://aroundme-e717d.appspot.com");
 
         storageRef = storage.getReference();
 
-        Log.d("SimpleArticleAdapter", "constructor");
+        Log.d("ArticleAdapter", "constructor");
     }
 
     @NonNull
@@ -42,25 +42,25 @@ public class SimpleArticleAdapter extends ArrayAdapter<SimpleArticle> {
                     .inflate(R.layout.item_simple_article, parent, false);
         }
 
-        final SimpleArticle simpleArticle = getItem(position);
+        final Article article = getItem(position);
 
-        if (simpleArticle == null)
+        if (article == null)
             return convertView;
 
         // Lookup view for data population
         TextView title = convertView.findViewById(R.id.simpleArticleTitle);
-        title.setText(simpleArticle.title);
+        title.setText(article.title);
 
         final ImageView cover = convertView.findViewById(R.id.simpleArticleImage);
 
         RatingBar ratingBar = convertView.findViewById(R.id.simpleRating);
-        ratingBar.setRating(simpleArticle.rating.floatValue());
+        ratingBar.setRating(article.averageRating.floatValue());
 
-        cover.setImageBitmap(simpleArticle.getBitmap(getContext(), new Runnable() {
+        cover.setImageBitmap(article.getBitmap(getContext(), new Runnable() {
             @Override
             public void run() {
-                Bitmap bitmap = simpleArticle.getBitmap(getContext());
-                Log.d("SimpleArticleAdapter", "position " + position + "-> bitmap " + String.valueOf(bitmap));
+                Bitmap bitmap = article.getBitmap(getContext());
+                Log.d("ArticleAdapter", "position " + position + "-> bitmap " + String.valueOf(bitmap));
                 cover.setImageBitmap(bitmap);
             }
         }));

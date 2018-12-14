@@ -7,8 +7,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
         android:alpha="0.1"
+        android:scaleType="centerCrop"
         android:src="@drawable/menu" />
 
     <ProgressBar
@@ -30,7 +30,8 @@
     <ListView
         android:id="@+id/notification_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:padding="10dp" />
     <!--<fragment-->
     <!--android:id="@+id/titles"-->
     <!--android:layout_weight="1"-->

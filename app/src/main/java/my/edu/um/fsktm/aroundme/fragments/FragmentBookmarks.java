@@ -23,12 +23,12 @@ import java.util.HashMap;
 import my.edu.um.fsktm.aroundme.ArticleViewActivity;
 import my.edu.um.fsktm.aroundme.R;
 import my.edu.um.fsktm.aroundme.adapters.CustomListAdapter;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
+import my.edu.um.fsktm.aroundme.objects.Article;
 import my.edu.um.fsktm.aroundme.objects.User;
 
 public class FragmentBookmarks extends Fragment {
     ListView list;
-    ArrayList<SimpleArticle> simpleArticles;
+    ArrayList<Article> articles;
 
     private ProgressBar progressBar;
     private TextView indicator;
@@ -53,30 +53,33 @@ public class FragmentBookmarks extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         final User user = User.currentUser;
-        final HashMap<String, String> storeTag = new HashMap<>(); // gg design
 
-        simpleArticles = new ArrayList<>();
-        final CustomListAdapter adapter = new CustomListAdapter(getActivity(), simpleArticles);
+        articles = new ArrayList<>();
+        final CustomListAdapter adapter = new CustomListAdapter(getActivity(), articles);
 
         FirebaseDatabase.getInstance()
                 .getReference()
-                .child("simple_articles")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+                .child("articles")
+                .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (articles == null)
+                            articles = new ArrayList<>();
+
+                        articles.clear();
                         int count = 0;
                         for (DataSnapshot tagData : dataSnapshot.getChildren()) {
                             for (DataSnapshot articleData : tagData.getChildren()) {
-                                SimpleArticle simpleArticle = articleData.getValue(SimpleArticle.class);
+                                if (articleData.getValue() == null)
+                                    continue;
 
-                                if (simpleArticle != null) {
-                                    for (String articleId : user.bookmarks) {
-                                        if (articleId.equals(simpleArticle.getArticleId())) {
-                                            storeTag.put(articleId, tagData.getKey());
-                                            count += 1;
-                                            simpleArticles.add(simpleArticle);
-                                            break;
-                                        }
+                                Article article = new Article((HashMap) articleData.getValue());
+
+                                for (String articleId : user.bookmarks) {
+                                    if (articleId.equals(article.articleId)) {
+                                        count += 1;
+                                        articles.add(article);
+                                        break;
                                     }
                                 }
 
@@ -109,12 +112,12 @@ public class FragmentBookmarks extends Fragment {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SimpleArticle simpleArticle = simpleArticles.get(position);
+                Article article = articles.get(position);
 
-                if (simpleArticle != null) {
+                if (article != null) {
                     Intent intent = new Intent(getActivity(), ArticleViewActivity.class);
-                    intent.putExtra("tag", storeTag.get(simpleArticle.getArticleId()));
-                    intent.putExtra("articleId", simpleArticle.getArticleId());
+                    intent.putExtra("tag", article.tag);
+                    intent.putExtra("articleId", article.articleId);
 
                     startActivityForResult(intent, 0);
                 }

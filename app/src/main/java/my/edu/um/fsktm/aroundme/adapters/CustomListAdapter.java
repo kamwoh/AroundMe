@@ -11,16 +11,16 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import my.edu.um.fsktm.aroundme.R;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
+import my.edu.um.fsktm.aroundme.objects.Article;
 
-public class CustomListAdapter extends ArrayAdapter<SimpleArticle> {
+public class CustomListAdapter extends ArrayAdapter<Article> {
     private final Activity context;
-    private ArrayList<SimpleArticle> list;
+    private ArrayList<Article> list;
 
-    public CustomListAdapter(Activity context, ArrayList<SimpleArticle> simpleArticleArrayList) {
-        super(context, R.layout.custom_bookmarklist, simpleArticleArrayList);
+    public CustomListAdapter(Activity context, ArrayList<Article> ArticleArrayList) {
+        super(context, R.layout.custom_bookmarklist, ArticleArrayList);
         this.context = context;
-        this.list = simpleArticleArrayList;
+        this.list = ArticleArrayList;
     }
 
     public View getView(final int position, View view, ViewGroup parent) {

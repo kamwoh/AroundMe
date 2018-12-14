@@ -95,7 +95,6 @@ public class User {
         Log.d("User", "isLogin " + isLogin);
 
         if (isLogin) {
-
             userRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -106,26 +105,28 @@ public class User {
 
                         if (map != null) {
                             if (map.containsKey("posts")) {
+                                Log.d("User", "updating posts");
                                 HashMap<String, String> postsMap;
                                 postsMap = (HashMap<String, String>) map.get("posts");
                                 ArrayList<String> posts = user.posts;
 
+                                posts.clear();
+
                                 for (String key : postsMap.keySet()) {
-                                    if (!posts.contains(postsMap.get(key))) {
-                                        posts.add(postsMap.get(key));
-                                        notificationsUpdate(user, postsMap.get(key));
-                                    }
+                                    posts.add(postsMap.get(key));
+                                    notificationsUpdate(user, postsMap.get(key));
                                 }
-
-
                             }
 
                             if (map.containsKey("bookmarks")) {
+                                Log.d("User", "updating bookmarks");
                                 HashMap<String, Boolean> bookmarksMap;
                                 bookmarksMap = (HashMap<String, Boolean>) map.get("bookmarks");
                                 ArrayList<String> bookmarks = user.bookmarks;
+                                bookmarks.clear();
+
                                 for (String key : bookmarksMap.keySet()) {
-                                    if (bookmarksMap.get(key) && !bookmarks.contains(key))
+                                    if (bookmarksMap.get(key))
                                         bookmarks.add(key);
                                 }
                             }
@@ -140,8 +141,8 @@ public class User {
             });
         } else {
             // not efficient but it is working :)
-            userRef.child("posts").setValue(user.posts);
-            userRef.child("bookmarks").setValue(user.bookmarks);
+//            userRef.child("posts").setValue(user.posts);
+//            userRef.child("bookmarks").setValue(user.bookmarks);
         }
     }
 

@@ -25,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -56,15 +57,15 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 import my.edu.um.fsktm.aroundme.ArticleEditActivity;
 import my.edu.um.fsktm.aroundme.ArticleViewActivity;
 import my.edu.um.fsktm.aroundme.LoginActivity;
 import my.edu.um.fsktm.aroundme.R;
-import my.edu.um.fsktm.aroundme.adapters.SimpleArticleAdapter;
+import my.edu.um.fsktm.aroundme.adapters.ArticleAdapter;
 import my.edu.um.fsktm.aroundme.objects.Article;
 import my.edu.um.fsktm.aroundme.objects.PlaceTypes;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
 
 import static my.edu.um.fsktm.aroundme.LoginActivity.ARTICLE_VIEW;
 
@@ -75,8 +76,8 @@ import static my.edu.um.fsktm.aroundme.LoginActivity.ARTICLE_VIEW;
 public class ListingFragment extends Fragment implements FragmentManager.OnBackStackChangedListener {
 
     private LoginActivity loginActivity;
-    private ArrayList<SimpleArticle> simpleArticles;
-    private ArrayList<String> simpleArticleIds;
+    private ArrayList<Article> articles;
+    private ArrayList<String> articleIds;
 
     private FirebaseDatabase database;
     private DatabaseReference simpleTagRef;
@@ -90,10 +91,11 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     private static Location lastKnownLocation;
 
     private String tag;
+    private TextView noItemIndicator;
     private ListView listView;
     private FrameLayout frameLayout;
-    private ProgressBar spinner;
-    private SimpleArticleAdapter adapter;
+    private ProgressBar progressBar;
+    private ArticleAdapter adapter;
     private boolean loadingGPS;
 
     public static double lat, lng;
@@ -188,42 +190,42 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     }
 
     private void loadFirebaseSimpleArticle(DataSnapshot child) {
-        SimpleArticle simpleArticle = child.getValue(SimpleArticle.class);
-
-        if (simpleArticle == null)
+        if (child.getValue() == null)
             return;
 
-        Location childLocation = new Location(simpleArticle.title);
-        childLocation.setLatitude(simpleArticle.lat);
-        childLocation.setLongitude(simpleArticle.lng);
+        HashMap map = (HashMap) child.getValue();
+        Article article = new Article(map);
+
+
+        Location childLocation = new Location(article.title);
+        childLocation.setLatitude(article.lat);
+        childLocation.setLongitude(article.lng);
 
         Location currLocation = new Location("Current Location");
         currLocation.setLatitude(lat);
         currLocation.setLongitude(lng);
 
-        if (childLocation.distanceTo(currLocation) < 5000) {
-            simpleArticles.add(simpleArticle);
-            simpleArticleIds.add(simpleArticle.getArticleId());
+        if (childLocation.distanceTo(currLocation) < 3000) {
+            articles.add(article);
+            articleIds.add(article.articleId);
         }
     }
 
     private void readResultFromRequest(JSONObject result, int i) throws JSONException {
         final Article article = new Article(tag, result);
 
-        if (simpleArticleIds.contains(article.articleId))
+        if (articleIds.contains(article.articleId))
             return;
 
         article.constructCoverUrl(getString(R.string.google_maps_key));
 
         Article.pushToFirebase(
-                simpleTagRef,
                 detailTagRef,
                 article,
-                null,
                 null);
 
-        simpleArticles.add(article.toSimpleArticle());
-        simpleArticleIds.add(article.articleId);
+        articles.add(article);
+        articleIds.add(article.articleId);
 
         Log.d("request " + i, article.toString());
         Log.d("request " + i, result.toString());
@@ -249,13 +251,18 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                     JSONArray results = reader.getJSONArray("results");
                     Log.d("how many results", String.valueOf(results.length()));
 
-                    for (int i = 0; i < results.length(); i++) {
-                        JSONObject result = results.getJSONObject(i);
-                        readResultFromRequest(result, i);
-                    }
+                    if (results.length() == 0) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        noItemIndicator.setVisibility(View.VISIBLE);
+                    } else {
+                        for (int i = 0; i < results.length(); i++) {
+                            JSONObject result = results.getJSONObject(i);
+                            readResultFromRequest(result, i);
+                        }
 
-                    updateAdapter();
-                    listView.invalidate();
+                        updateAdapter();
+                        listView.invalidate();
+                    }
                 } catch (Exception e) {
                     Log.e("ListingFragment", e.getMessage());
                     Toast.makeText(loginActivity, "Connection error", Toast.LENGTH_SHORT).show();
@@ -311,18 +318,17 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         firebaseUser = auth.getCurrentUser();
 
         database = FirebaseDatabase.getInstance();
-        simpleTagRef = database.getReference("simple_articles/" + tag);
         detailTagRef = database.getReference("articles/" + tag);
 
         geoDataClient = Places.getGeoDataClient(loginActivity);
         placeDetectionClient = Places.getPlaceDetectionClient(loginActivity);
 
-        if (simpleArticles == null) {
-            simpleArticles = new ArrayList<>();
-            simpleArticleIds = new ArrayList<>();
+        if (articles == null) {
+            articles = new ArrayList<>();
+            articleIds = new ArrayList<>();
         }
 
-        simpleTagRef
+        detailTagRef
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -332,9 +338,9 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                             loadFirebaseSimpleArticle(child);
                         }
 
-                        Log.d("how many?", "is " + simpleArticles.size());
+                        Log.d("how many?", "is " + articles.size());
 
-                        if (simpleArticles.size() < 30) {
+                        if (articles.size() < 30) {
                             RequestQueue queue = Volley.newRequestQueue(loginActivity);
                             StringRequest stringRequest = getStringRequest();
                             queue.add(stringRequest);
@@ -370,21 +376,23 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         // Attach the adapter to a ListView
         listView = v.findViewById(R.id.simpleArticleList);
         frameLayout = v.findViewById(R.id.listing_frame_layout);
-        spinner = v.findViewById(R.id.listing_progress_bar);
+        progressBar = v.findViewById(R.id.listing_progress_bar);
+        noItemIndicator = v.findViewById(R.id.listing_no_item);
 
         frameLayout.setVisibility(View.INVISIBLE);
-        spinner.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+        noItemIndicator.setVisibility(View.INVISIBLE);
 
         String title = getArguments().getString("title");
 
         loginActivity.getSupportActionBar().setTitle(title);
 
-        if (simpleArticles == null) {
-            simpleArticles = new ArrayList<>();
-            simpleArticleIds = new ArrayList<>();
+        if (articles == null) {
+            articles = new ArrayList<>();
+            articleIds = new ArrayList<>();
         }
 
-        adapter = new SimpleArticleAdapter(getActivity(), simpleArticles);
+        adapter = new ArticleAdapter(getActivity(), articles);
         listView.setAdapter(adapter);
 
         FloatingActionButton fab = v.findViewById(R.id.fab);
@@ -398,11 +406,11 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 // load detail from firebase using simplearticle
                 // extra: store as cache in sqlite
                 // pass detail into article view for display
-                Toast.makeText(getContext(), "onclick " + position, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "onclick " + position, Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(loginActivity, ArticleViewActivity.class);
                 intent.putExtra("tag", tag);
-                intent.putExtra("articleId", simpleArticles.get(position).getArticleId());
+                intent.putExtra("articleId", articles.get(position).articleId);
                 startActivityForResult(intent, ARTICLE_VIEW);
             }
         });
@@ -444,9 +452,9 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
     private void updateAdapter() {
         Log.d("ListingFragment", "updateAdapter");
-        Collections.sort(simpleArticles, new Comparator<SimpleArticle>() {
+        Collections.sort(articles, new Comparator<Article>() {
             @Override
-            public int compare(SimpleArticle o1, SimpleArticle o2) {
+            public int compare(Article o1, Article o2) {
                 Location location1 = new Location(o1.title);
                 location1.setLatitude(o1.lat);
                 location1.setLongitude(o1.lng);
@@ -468,11 +476,11 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
             }
         });
 
-        if (simpleArticles.size() > 0) {
-            int lastIndex = Math.min(simpleArticles.size(), 30);
+        if (articles.size() > 0) {
+            int lastIndex = Math.min(articles.size(), 30);
 
-            for (int i = lastIndex; i < simpleArticles.size(); i++) {
-                simpleArticles.remove(i);
+            for (int i = lastIndex; i < articles.size(); i++) {
+                articles.remove(i);
             }
 
             final Handler handler = new Handler();
@@ -480,7 +488,8 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                 @Override
                 public void run() {
                     frameLayout.setVisibility(View.VISIBLE);
-                    spinner.setVisibility(View.INVISIBLE);
+                    progressBar.setVisibility(View.INVISIBLE);
+                    noItemIndicator.setVisibility(View.INVISIBLE);
                 }
             }, 1000);
 

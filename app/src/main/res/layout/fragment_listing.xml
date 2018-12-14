@@ -20,6 +20,15 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true" />
 
+    <TextView
+        android:visibility="invisible"
+        android:id="@+id/listing_no_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="20sp"
+        android:text="No items..." />
+
     <FrameLayout
         android:id="@+id/listing_frame_layout"
         android:layout_width="match_parent"

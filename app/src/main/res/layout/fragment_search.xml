@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.SearchFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -31,7 +32,11 @@
                 android:id="@+id/fragment_search_button"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/baseline_search_black_18dp" />
+                android:padding="5dp"
+                app:srcCompat="@drawable/magnifier_tool"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:background="@android:color/transparent" />
 
         </LinearLayout>
 

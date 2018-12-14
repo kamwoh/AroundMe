@@ -34,23 +34,22 @@ import java.util.HashMap;
 import my.edu.um.fsktm.aroundme.ArticleViewActivity;
 import my.edu.um.fsktm.aroundme.LoginActivity;
 import my.edu.um.fsktm.aroundme.R;
-import my.edu.um.fsktm.aroundme.adapters.SimpleArticleAdapter;
+import my.edu.um.fsktm.aroundme.adapters.ArticleAdapter;
+import my.edu.um.fsktm.aroundme.objects.Article;
 import my.edu.um.fsktm.aroundme.objects.PlaceTypes;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class SearchFragment extends Fragment implements FragmentManager.OnBackStackChangedListener {
 
-    private DatabaseReference simpleTagRef;
+    private DatabaseReference tagRef;
     private LoginActivity loginActivity;
     private String tag;
     private EditText searchBar;
     private ImageButton searchButton;
     private ListView resultList;
-    private HashMap<String, String> storeTag;
-    private ArrayList<SimpleArticle> results;
+    private ArrayList<Article> results;
 
     public SearchFragment() {
         // Required empty public constructor
@@ -58,25 +57,28 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
 
     private void searchForTag(final String keyword, final String tag) {
 //        Toast.makeText(loginActivity, "serachhh " + tag, Toast.LENGTH_SHORT).show();
-        simpleTagRef = FirebaseDatabase.getInstance().getReference().child("simple_articles/" + tag);
+        tagRef = FirebaseDatabase.getInstance().getReference().child("articles/" + tag);
 
-        simpleTagRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        tagRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Log.d("SearchFragment", dataSnapshot.getKey());
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    if (child.getValue() == null)
+                        continue;
+
                     for (String word : keyword.split(" ")) {
-                        SimpleArticle simpleArticle = child.getValue(SimpleArticle.class);
-                        if (simpleArticle != null && (simpleArticle.title + " " + simpleArticle.keyword).toLowerCase().contains(word.toLowerCase())) {
-                            results.add(simpleArticle);
-                            storeTag.put(simpleArticle.getArticleId(), tag);
+                        Article article = new Article((HashMap) child.getValue());
+                        if ((article.title + " " + article.keyword).toLowerCase().contains(word.toLowerCase())) {
+                            results.add(article);
                             break;
                         }
                     }
                 }
 
                 Log.d("SearchFragment", results.toString());
-                SimpleArticleAdapter adapter = new SimpleArticleAdapter(loginActivity, results);
+
+                ArticleAdapter adapter = new ArticleAdapter(loginActivity, results);
                 resultList.setAdapter(adapter);
                 resultList.invalidate();
             }
@@ -95,7 +97,6 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
         Log.d("SearchFragment", keyword + " tag " + tag);
 
         results = new ArrayList<>();
-        storeTag = new HashMap<>();
 
         if (tag.length() != 0) {
             searchForTag(keyword, tag);
@@ -158,7 +159,7 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
         searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (actionId == KeyEvent.KEYCODE_ENTER)) {
+                if (actionId == KeyEvent.KEYCODE_ENTER) {
                     onSearch();
                     return true;
                 }
@@ -170,12 +171,12 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
         resultList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SimpleArticle simpleArticle = results.get(position);
+                Article article = results.get(position);
 
-                if (simpleArticle != null) {
+                if (article != null) {
                     Intent intent = new Intent(getActivity(), ArticleViewActivity.class);
-                    intent.putExtra("tag", storeTag.get(simpleArticle.getArticleId()));
-                    intent.putExtra("articleId", simpleArticle.getArticleId());
+                    intent.putExtra("tag", article.tag);
+                    intent.putExtra("articleId", article.articleId);
 
                     startActivityForResult(intent, 0);
                 }

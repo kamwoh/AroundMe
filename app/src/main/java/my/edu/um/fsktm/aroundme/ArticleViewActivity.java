@@ -5,11 +5,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -32,6 +35,7 @@ import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -56,7 +60,6 @@ import java.util.HashMap;
 import my.edu.um.fsktm.aroundme.adapters.CommentsListAdapter;
 import my.edu.um.fsktm.aroundme.objects.Article;
 import my.edu.um.fsktm.aroundme.objects.Comment;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
 import my.edu.um.fsktm.aroundme.objects.User;
 
 
@@ -239,78 +242,83 @@ public class ArticleViewActivity extends AppCompatActivity {
         });
 
 
-        articleRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @SuppressLint("MissingPermission")
+        new Handler().postDelayed(new Runnable() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.d("ArticleViewActivity", "articleRef " + dataSnapshot.getKey());
-                final Article article = new Article((HashMap) dataSnapshot.getValue());
-                ArticleViewActivity.this.article = article;
-
-                isAuthor = article.author.equals(user.userId);
-
-                if (isAuthor) {
-                    editItem.setVisible(true);
-                }
-
-                TextView title = findViewById(R.id.article_view_title);
-                TextView content = findViewById(R.id.article_view_content);
-                final ImageView expandedImage = findViewById(R.id.expanded_image);
-                final ImageButton cover = findViewById(R.id.article_view_cover);
-                final SimpleArticle simpleArticle = article.toSimpleArticle();
-
-                getSupportActionBar().setTitle(article.title);
-
-                title.setText(article.title);
-
-                String text = article.description;
-
-                if (text.length() == 0)
-                    text = "No description.";
-
-                content.setText(text);
-
-                cover.setImageBitmap(simpleArticle.getBitmap(getApplicationContext(), new Runnable() {
+            public void run() {
+                articleRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @SuppressLint("MissingPermission")
                     @Override
-                    public void run() {
-                        Log.d("ArticleViewActivity", "Set bitmap cover");
-                        Bitmap bitmap = simpleArticle.getBitmap(getApplicationContext());
-                        Log.d("ArticleViewActivity", "bitmap reference " + bitmap);
-                        cover.setImageBitmap(bitmap);
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Log.d("ArticleViewActivity", "articleRef " + dataSnapshot.getKey());
+                        final Article article = new Article((HashMap) dataSnapshot.getValue());
+                        ArticleViewActivity.this.article = article;
+
+                        isAuthor = article.author.equals(user.userId);
+
+                        if (isAuthor) {
+                            editItem.setVisible(true);
+                            deleteItem.setVisible(true);
+                        }
+
+                        TextView title = findViewById(R.id.article_view_title);
+                        TextView content = findViewById(R.id.article_view_content);
+                        final ImageView expandedImage = findViewById(R.id.expanded_image);
+                        final ImageButton cover = findViewById(R.id.article_view_cover);
+
+                        getSupportActionBar().setTitle(article.title);
+
+                        title.setText(article.title);
+
+                        String text = article.description;
+
+                        if (text.length() == 0)
+                            text = "No description.";
+
+                        content.setText(text);
+
+                        cover.setImageBitmap(article.getBitmap(getApplicationContext(), new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.d("ArticleViewActivity", "Set bitmap cover");
+                                Bitmap bitmap = article.getBitmap(getApplicationContext());
+                                Log.d("ArticleViewActivity", "bitmap reference " + bitmap);
+                                cover.setImageBitmap(bitmap);
+                            }
+                        }));
+
+                        cover.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+                                zoomImageFromThumb(cover, scrollViewParent);
+                            }
+                        });
+
+                        if (googleMap != null) { // not sure which one will ready first
+                            latLng = new LatLng(article.lat, article.lng);
+                            MarkerOptions markerOptions = new MarkerOptions();
+                            markerOptions.position(latLng);
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+
+                            googleMap.getUiSettings().setZoomControlsEnabled(true);
+                            googleMap.getUiSettings().setZoomGesturesEnabled(true);
+                            googleMap.setMyLocationEnabled(true);
+                            googleMap.addMarker(markerOptions);
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                            googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
+                        }
+
+                        scrollViewParent.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
-                }));
 
-                cover.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-                        zoomImageFromThumb(cover, scrollViewParent);
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
                     }
                 });
-
-                if (googleMap != null) { // not sure which one will ready first
-                    latLng = new LatLng(article.lat, article.lng);
-                    MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(latLng);
-                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
-
-                    googleMap.getUiSettings().setZoomControlsEnabled(true);
-                    googleMap.getUiSettings().setZoomGesturesEnabled(true);
-                    googleMap.setMyLocationEnabled(true);
-                    googleMap.addMarker(markerOptions);
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                    googleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
-                }
-
-                scrollViewParent.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        }, 500); // setup after 0.5 seconds
     }
 
     @Override
@@ -362,7 +370,39 @@ public class ArticleViewActivity extends AppCompatActivity {
 
             case R.id.action_delete:
                 // TODO: DELETE
-                finish();
+
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                //Yes button clicked
+
+                                FirebaseDatabase.getInstance()
+                                        .getReference()
+                                        .child("articles")
+                                        .child(tag)
+                                        .child(articleId)
+                                        .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        Toast.makeText(getApplicationContext(), "Post has been deleted", Toast.LENGTH_SHORT).show();
+                                        finish();
+                                    }
+                                });
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Are you sure to delete your post?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
                 return true;
 
             case R.id.action_favorite:
@@ -373,7 +413,17 @@ public class ArticleViewActivity extends AppCompatActivity {
                         .child(user.userId)
                         .child("bookmarks")
                         .child(articleId)
-                        .setValue(!isFavorite);
+                        .setValue(!isFavorite)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (isFavorite)
+                                    Toast.makeText(ArticleViewActivity.this, "You have added this into your bookmark", Toast.LENGTH_SHORT).show();
+                                else
+                                    Toast.makeText(ArticleViewActivity.this, "You have removed this from your bookmark", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
 
                 return true;
             case R.id.action_sign_out:
@@ -478,10 +528,11 @@ public class ArticleViewActivity extends AppCompatActivity {
         if (menu != null) { // if firebase is loaded first
             MenuItem menuItem = menu.findItem(R.id.action_favorite);
             if (menuItem != null) {
-                if (isFavorite)
+                if (isFavorite) {
                     menuItem.setIcon(R.drawable.like_on);
-                else
+                } else {
                     menuItem.setIcon(R.drawable.like_off);
+                }
             }
         }
     }

@@ -13,12 +13,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import my.edu.um.fsktm.aroundme.R;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
+import my.edu.um.fsktm.aroundme.objects.Article;
 
-public class CustomArticleListAdapter extends ArrayAdapter<SimpleArticle> {
+public class CustomArticleListAdapter extends ArrayAdapter<Article> {
     private final Activity context;
 
-    public CustomArticleListAdapter(Activity context, ArrayList<SimpleArticle> simpleArticleArrayList) {
+    public CustomArticleListAdapter(Activity context, ArrayList<Article> simpleArticleArrayList) {
         super(context, R.layout.custom_articlelist, simpleArticleArrayList);
         this.context = context;
     }
@@ -33,18 +33,18 @@ public class CustomArticleListAdapter extends ArrayAdapter<SimpleArticle> {
 
         final TextView comment = view.findViewById(R.id.article_comment);
         final ImageView commentImg = view.findViewById(R.id.article_img);
-        final SimpleArticle simpleArticle = getItem(position);
+        final Article article = getItem(position);
 
-        Log.d("CustomArticleAdapter", " " + simpleArticle);
+        Log.d("CustomArticleAdapter", " " + article);
 
-        if (simpleArticle != null) {
-            String s = "You added a new place named: " + simpleArticle.title;
+        if (article != null) {
+            String s = "You added a new place named: " + article.title;
             comment.setText(s);
 
-            commentImg.setImageBitmap(simpleArticle.getBitmap(getContext(), new Runnable() {
+            commentImg.setImageBitmap(article.getBitmap(getContext(), new Runnable() {
                 @Override
                 public void run() {
-                    commentImg.setImageBitmap(simpleArticle.getBitmap(getContext()));
+                    commentImg.setImageBitmap(article.getBitmap(getContext()));
                 }
             }));
         }

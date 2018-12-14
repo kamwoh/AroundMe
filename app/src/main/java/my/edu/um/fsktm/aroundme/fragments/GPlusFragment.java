@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -45,6 +46,7 @@ public class GPlusFragment extends Fragment {
     private FirebaseAuth auth;
     private View layout;
     private View progressBar;
+    private ImageView background;
     private static final int RC_SIGN_IN = 0;
     private boolean isSignOut = false; // to check whether this fragment should skip sign in page
     private boolean displayedSigningIn = false;
@@ -112,13 +114,16 @@ public class GPlusFragment extends Fragment {
 
         layout = v.findViewById(R.id.gplus_layout);
         progressBar = v.findViewById(R.id.listing_progress_bar_in_gplus);
+        background = v.findViewById(R.id.background);
 
         if (account == null) {
             layout.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
+            background.setAlpha(0.9f);
         } else { // it has account
             layout.setVisibility(View.INVISIBLE);
             progressBar.setVisibility(View.VISIBLE);
+            background.setAlpha(0.45f);
         }
 
         return v;
@@ -160,6 +165,7 @@ public class GPlusFragment extends Fragment {
                                 public void run() {
                                     Fragment fragment = new HomeFragment();
                                     progressBar.setVisibility(View.INVISIBLE);
+                                    background.setAlpha(0.9f);
                                     fm.beginTransaction()
                                             .remove(GPlusFragment.this)
                                             .replace(R.id.fragment_container, fragment)
@@ -178,6 +184,7 @@ public class GPlusFragment extends Fragment {
             account = completedTask.getResult(ApiException.class);
             layout.setVisibility(View.INVISIBLE);
             progressBar.setVisibility(View.VISIBLE);
+            background.setAlpha(0.45f);
             switchToHomeFragment();
         } catch (ApiException e) {
             Toast.makeText(getActivity(), R.string.sign_in_failed, Toast.LENGTH_LONG).show();

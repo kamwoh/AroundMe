@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import my.edu.um.fsktm.aroundme.objects.Article;
-import my.edu.um.fsktm.aroundme.objects.SimpleArticle;
 import my.edu.um.fsktm.aroundme.objects.User;
 
 public class ArticleEditActivity extends AppCompatActivity {
@@ -108,7 +107,8 @@ public class ArticleEditActivity extends AppCompatActivity {
 //        transparentScreen.setVisibility(View.INVISIBLE);
         blockTouch = false;
 
-        setTitle("Add New Article");
+        if (getActionBar() != null)
+            getActionBar().setTitle("Add New Article for " + tag);
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,7 +157,6 @@ public class ArticleEditActivity extends AppCompatActivity {
                     map.put("lng", placeLatLng.longitude);
 
                     final Article article = new Article(map);
-                    final SimpleArticle simpleArticle = article.toSimpleArticle();
 
                     if (!edit) {
                         FirebaseDatabase.getInstance()
@@ -193,13 +192,6 @@ public class ArticleEditActivity extends AppCompatActivity {
                                                     finish();
                                                 }
                                             });
-
-                                    FirebaseDatabase.getInstance()
-                                            .getReference()
-                                            .child("simple_articles")
-                                            .child(tag)
-                                            .child(article.articleId)
-                                            .setValue(simpleArticle);
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -256,17 +248,19 @@ public class ArticleEditActivity extends AppCompatActivity {
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() == null)
+                                return;
+
                             final Article article = new Article((HashMap) dataSnapshot.getValue());
-                            final SimpleArticle simpleArticle = article.toSimpleArticle();
 
                             blockTouch = false;
                             title.setText(article.title);
                             desc.setText(article.description);
 
-                            simpleArticle.getBitmap(getApplicationContext(), new Runnable() {
+                            article.getBitmap(getApplicationContext(), new Runnable() {
                                 @Override
                                 public void run() {
-                                    setImageView(simpleArticle.getBitmap(getApplicationContext()));
+                                    setImageView(article.getBitmap(getApplicationContext()));
                                 }
                             });
 
