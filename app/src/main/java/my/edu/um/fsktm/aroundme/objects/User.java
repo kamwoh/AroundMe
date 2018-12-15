@@ -61,7 +61,19 @@ public class User {
                                 if (!cm.userId.equals(user.userId)) {
                                     cm.setArticleId(articleId);
                                     cm.setTag(tag);
-                                    user.notifications.add(cm);
+
+//                                    if (!user.notifications.contains())
+                                    boolean contain = false;
+
+                                    for (int i = 0; i < user.notifications.size(); i++) {
+                                        if (cm.getArticleId().equals(user.notifications.get(i).getArticleId())) {
+                                            contain = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!contain)
+                                        user.notifications.add(cm);
                                 }
                             }
                         }

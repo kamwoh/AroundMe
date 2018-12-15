@@ -220,14 +220,14 @@ public class ArticleViewActivity extends AppCompatActivity {
 
                                                 articleRef.child("averageRating")
                                                         .setValue(ratings);
-
-                                                FirebaseDatabase.getInstance()
-                                                        .getReference()
-                                                        .child("simple_articles")
-                                                        .child(tag)
-                                                        .child(articleId)
-                                                        .child("rating")
-                                                        .setValue(ratings);
+//
+//                                                FirebaseDatabase.getInstance()
+//                                                        .getReference()
+//                                                        .child("simple_articles")
+//                                                        .child(tag)
+//                                                        .child(articleId)
+//                                                        .child("rating")
+//                                                        .setValue(ratings);
                                             }
 
                                             @Override

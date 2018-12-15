@@ -21,26 +21,29 @@
 
         <TextView
             android:id="@+id/simpleArticleTitle"
-            android:layout_width="100sp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:singleLine="true"
             android:text="Longgggggggggggggg text"
-            android:ellipsize="end"/>
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:ellipsize="end"
             android:layout_weight="1" />
+
+        <!--<Space-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="0dp"-->
+        <!--android:layout_weight="1" />-->
 
         <RatingBar
             android:id="@+id/simpleRating"
+            style="?android:attr/ratingBarStyleIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:numStars="5"
             android:rating="3"
             android:stepSize="0.5"
             android:isIndicator="true"
-            android:theme="@style/RatingBar" />
+            android:theme="@style/RatingBar"
+            android:layout_weight="0" />
     </LinearLayout>
 </LinearLayout>
