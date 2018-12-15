@@ -1,11 +1,17 @@
 package my.edu.um.fsktm.aroundme.fragments;
 
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -21,6 +27,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,6 +36,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import my.edu.um.fsktm.aroundme.ArticleViewActivity;
@@ -77,6 +86,49 @@ public class SearchFragment extends Fragment implements FragmentManager.OnBackSt
                 }
 
                 Log.d("SearchFragment", results.toString());
+
+                LocationManager lm = (LocationManager) loginActivity.getSystemService(Context.LOCATION_SERVICE);
+
+                double lat1 = 0, lng1 = 0;
+
+                if (lm != null) {
+                    if (ActivityCompat.checkSelfPermission(loginActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(loginActivity, "permission blocked", Toast.LENGTH_SHORT).show();
+                        loginActivity.getSupportFragmentManager().popBackStack();
+                        return;
+                    }
+                    Location location = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                    if (location != null) {
+                        lat1 = location.getLatitude();
+                        lng1 = location.getLongitude();
+                    }
+                }
+
+                final double lat = lat1, lng = lng1;
+
+                Collections.sort(results, new Comparator<Article>() {
+                    @Override
+                    public int compare(Article o1, Article o2) {
+                        Location location1 = new Location(o1.title);
+                        location1.setLatitude(o1.lat);
+                        location1.setLongitude(o1.lng);
+
+                        Location location2 = new Location(o2.title);
+                        location2.setLatitude(o2.lat);
+                        location2.setLongitude(o2.lng);
+
+                        Location currentLocation = new Location("Current location");
+                        currentLocation.setLatitude(lat);
+                        currentLocation.setLongitude(lng);
+
+                        double distance1 = currentLocation.distanceTo(location1);
+                        double distance2 = currentLocation.distanceTo(location2);
+
+                        double distance = distance1 - distance2;
+
+                        return (int) distance;
+                    }
+                });
 
                 ArticleAdapter adapter = new ArticleAdapter(loginActivity, results);
                 resultList.setAdapter(adapter);

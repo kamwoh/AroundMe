@@ -94,18 +94,18 @@ public class HomeFragment extends Fragment {
                 R.id.list_donate_button
         };
 
-        int[] drawableIds = {
-                R.drawable.fast_food,
-                R.drawable.camera,
-                R.drawable.train,
-                R.drawable.bed,
-                R.drawable.baseline_collections_bookmark_black_18dp,
-                R.drawable.magnifier_tool
-        };
+//        int[] drawableIds = {
+//                R.drawable.fast_food,
+//                R.drawable.camera,
+//                R.drawable.train,
+//                R.drawable.bed,
+//                R.drawable.baseline_collections_bookmark_black_18dp,
+//                R.drawable.magnifier_tool
+//        };
 
         for (int i = 0; i < buttonIds.length; i++) {
             ImageButton button = v.findViewById(buttonIds[i]);
-            button.setImageResource(drawableIds[i]);
+//            button.setImageResource(drawableIds[i]);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

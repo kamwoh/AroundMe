@@ -7,9 +7,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,6 +75,22 @@ public class ArticleEditActivity extends AppCompatActivity {
     private GoogleMap map;
     private SupportMapFragment mapFragment;
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Log.d("ArticleEditActivity", "exit only");
+                setResult(RESULT_OK);
+                finish();
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +101,14 @@ public class ArticleEditActivity extends AppCompatActivity {
         final EditText desc = findViewById(R.id.desc);
 
         tag = getIntent().getExtras().getString("tag");
+
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setTitle("Add New Article for " + tag);
+
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.article_view_map);
         mapFragment.getMapAsync(new OnMapReadyCallback() {
@@ -107,9 +134,6 @@ public class ArticleEditActivity extends AppCompatActivity {
 //        progressBar.setVisibility(View.INVISIBLE);
 //        transparentScreen.setVisibility(View.INVISIBLE);
         blockTouch = false;
-
-        if (getActionBar() != null)
-            getActionBar().setTitle("Add New Article for " + tag);
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -286,17 +310,17 @@ public class ArticleEditActivity extends AppCompatActivity {
     }
 
     private void chooseImage() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//
+//        if (intent.resolveActivity(getPackageManager()) != null) {
+//            startActivityForResult(intent,
+//                    REQUEST_CAPTURE_IMAGE);
+//        }
 
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent,
-                    REQUEST_CAPTURE_IMAGE);
-        }
-
-//        Intent intent = new Intent();
-//        intent.setType("image/*");
-//        intent.setAction(Intent.ACTION_GET_CONTENT);
-//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
     private void setImageView(Bitmap bitmap) {

@@ -9,6 +9,9 @@
     <color name="blue_grey_900">#263238</color>
     <color name="colorWhite">#ffffff</color>
     <color name="colorTabIndicator">#DCDCDC</color>
-    <color name="colorPrimary">#000000</color>
+    <color name="colorPrimary">#353b48</color>
+    <color name="toolbarColor">#8db1c8</color>
+    <color name="homeButtonColor">#cebb9c</color>
+    <color name="textShadow">#7F000000</color>
 
 </resources>

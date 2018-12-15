@@ -447,7 +447,10 @@ public class ArticleViewActivity extends AppCompatActivity {
 
     private void populateCommentsList() {
         final ListView listView = findViewById(R.id.article_view_list_view_reviews);
+        final TextView noCommentsView = findViewById(R.id.list_empty);
         final ArrayList<Comment> listOfReviews = new ArrayList<>();
+
+        //listView.setEmptyView(noCommentsView);
         adapter = new CommentsListAdapter(this, listOfReviews);
         listView.setAdapter(adapter);
 
@@ -457,6 +460,7 @@ public class ArticleViewActivity extends AppCompatActivity {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                         Comment comment = dataSnapshot.getValue(Comment.class);
+                        noCommentsView.setVisibility(View.INVISIBLE);
                         listOfReviews.add(comment);
                         listView.invalidate();
                         setListViewHeightBasedOnChildren(listView);

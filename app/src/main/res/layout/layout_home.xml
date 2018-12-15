@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
-        android:alpha="0.15"
+        android:alpha="0.5"
         android:src="@drawable/menu" />
 
     <LinearLayout
@@ -19,20 +19,25 @@
         android:layout_marginStart="70dp"
         android:layout_marginTop="82dp"
         android:orientation="vertical"
+        android:background="@drawable/home_button_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/list_food_button"
             android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:srcCompat="@mipmap/ic_launcher_round"
+            android:layout_height="80dp"
+            app:srcCompat="@drawable/fast_food"
             android:background="@android:color/transparent" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:shadowColor="@color/textShadow"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
             android:text="Food"
             android:textSize="12sp" />
 
@@ -45,20 +50,25 @@
         android:layout_marginEnd="70dp"
         android:layout_marginTop="82dp"
         android:orientation="vertical"
+        android:background="@drawable/home_button_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/list_landmark_button"
             android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:srcCompat="@mipmap/ic_launcher"
+            android:layout_height="80dp"
+            app:srcCompat="@drawable/tower"
             android:background="@android:color/transparent" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:shadowColor="@color/textShadow"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
             android:text="Landmark"
             android:textSize="12sp" />
 
@@ -70,20 +80,25 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="41dp"
         android:orientation="vertical"
+        android:background="@drawable/home_button_layout"
         app:layout_constraintStart_toStartOf="@+id/list_food"
         app:layout_constraintTop_toBottomOf="@+id/list_food">
 
         <ImageButton
             android:id="@+id/list_accommodation_button"
             android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:srcCompat="@mipmap/ic_launcher_round"
+            android:layout_height="80dp"
+            app:srcCompat="@drawable/bed"
             android:background="@android:color/transparent" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:shadowColor="@color/textShadow"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
             android:text="Accommodation"
             android:textSize="12sp" />
     </LinearLayout>
@@ -94,20 +109,25 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="70dp"
         android:orientation="vertical"
+        android:background="@drawable/home_button_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/list_accommodation">
 
         <ImageButton
             android:id="@+id/list_transportation_button"
             android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:srcCompat="@mipmap/ic_launcher_round"
+            android:layout_height="80dp"
+            app:srcCompat="@drawable/train"
             android:background="@android:color/transparent" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:shadowColor="@color/textShadow"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
             android:text="Transportation"
             android:textSize="12sp" />
 
@@ -119,20 +139,25 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="41dp"
         android:orientation="vertical"
+        android:background="@drawable/home_button_layout"
         app:layout_constraintStart_toStartOf="@+id/list_accommodation"
         app:layout_constraintTop_toBottomOf="@+id/list_accommodation">
 
         <ImageButton
             android:id="@+id/list_my_collections_button"
             android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:srcCompat="@mipmap/ic_launcher_round"
+            android:layout_height="80dp"
+            app:srcCompat="@drawable/book"
             android:background="@android:color/transparent" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:shadowColor="@color/textShadow"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
             android:text="My Collections"
             android:textSize="12sp" />
     </LinearLayout>
@@ -143,20 +168,26 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="70dp"
         android:orientation="vertical"
+        android:background="@drawable/home_button_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/list_my_collections">
 
         <ImageButton
             android:id="@+id/list_donate_button"
             android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:srcCompat="@mipmap/ic_launcher_round"
+            android:layout_height="80dp"
+            app:srcCompat="@drawable/magnifier_tool"
             android:background="@android:color/transparent" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:textAlignment="center"
+            android:shadowColor="@color/textShadow"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
             android:text="Search"
             android:textSize="12sp" />
     </LinearLayout>

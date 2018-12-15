@@ -2,6 +2,7 @@ package my.edu.um.fsktm.aroundme.fragments;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -292,7 +293,9 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
 
         FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(loginActivity);
 
+        @SuppressLint("MissingPermission")
         Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
+
         locationResult.addOnCompleteListener(new OnCompleteListener<Location>() {
             @Override
             public void onComplete(@NonNull Task<Location> task) {
