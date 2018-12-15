@@ -2,11 +2,11 @@ package my.edu.um.fsktm.aroundme.fragments;
 
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -102,6 +102,29 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
     public static double lat, lng;
     private final int ADD_NEW_PLACE = 12;
 
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(final Location location) {
+            //your code here
+            lastKnownLocation = location;
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
+
     public ListingFragment() {
         // Required empty public constructor
     }
@@ -151,7 +174,7 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
                     if (task.isSuccessful()) {
                         // Set the map's camera position to the current location of the device.
                         lastKnownLocation = task.getResult();
-                        Log.d("ListingFragment", String.valueOf(lastKnownLocation));
+                        Log.d("ListingFragment", "lastKnownLocation: " + String.valueOf(lastKnownLocation));
                     } else {
                         Log.d("ListingFragment", "Current location is null. Using defaults.");
                         Log.e("ListingFragment", "Exception: %s", task.getException());
@@ -291,28 +314,30 @@ public class ListingFragment extends Fragment implements FragmentManager.OnBackS
         loginActivity.getSupportFragmentManager().addOnBackStackChangedListener(this);
         loginActivity.getSupportActionBar().setTitle(title);
 
-        FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(loginActivity);
-
-        @SuppressLint("MissingPermission")
-        Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
-
-        locationResult.addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if (task.isSuccessful()) {
-                    // Set the map's camera position to the current location of the device.
-                    lastKnownLocation = task.getResult();
-                    Log.d("ListingFragment", String.valueOf(lastKnownLocation));
-                } else {
-                    Log.d("ListingFragment", "Current location is null. Using defaults.");
-                    Log.e("ListingFragment", "Exception: %s", task.getException());
-                    Toast.makeText(loginActivity, "please turn on gps and restart", Toast.LENGTH_SHORT).show();
-                    loginActivity.getSupportFragmentManager().popBackStack();
-                }
-
-                loadingGPS = false;
-            }
-        });
+//        LocationManager locationManager = (LocationManager) loginActivity.getSystemService(LOCATION_SERVICE);
+//
+//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000l, 100.0f, locationListener);
+//
+////        FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(loginActivity);
+////        Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
+////
+////        locationResult.addOnCompleteListener(new OnCompleteListener<Location>() {
+////            @Override
+////            public void onComplete(@NonNull Task<Location> task) {
+////                if (task.isSuccessful()) {
+////                    // Set the map's camera position to the current location of the device.
+////                    lastKnownLocation = task.getResult();
+////                    Log.d("ListingFragment", String.valueOf(lastKnownLocation));
+////                } else {
+////                    Log.d("ListingFragment", "Current location is null. Using defaults.");
+////                    Log.e("ListingFragment", "Exception: %s", task.getException());
+////                    Toast.makeText(loginActivity, "please turn on gps and restart", Toast.LENGTH_SHORT).show();
+////                    loginActivity.getSupportFragmentManager().popBackStack();
+////                }
+////
+////                loadingGPS = false;
+////            }
+////        });
 
         if (!checkPermissionAndLocations())
             return;

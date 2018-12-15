@@ -137,7 +137,6 @@ public class ArticleEditActivity extends AppCompatActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                blockTouch = true;
 //                progressBar.setVisibility(View.VISIBLE);
 //                transparentScreen.setVisibility(View.VISIBLE);
 
@@ -153,6 +152,7 @@ public class ArticleEditActivity extends AppCompatActivity {
                 } else if (currentBitmap == null) {
                     Toast.makeText(getApplicationContext(), "Image cannot be empty", Toast.LENGTH_SHORT).show();
                 } else {
+                    blockTouch = true;
                     HashMap<String, Object> map = new HashMap<>();
 
                     final DatabaseReference newArticleRef;
@@ -224,6 +224,7 @@ public class ArticleEditActivity extends AppCompatActivity {
                                     Toast.makeText(getApplicationContext(), "Upload failed, make sure you have internet!", Toast.LENGTH_SHORT).show();
 //                                    progressBar.setVisibility(View.INVISIBLE);
 //                                    transparentScreen.setVisibility(View.INVISIBLE);
+                                    blockTouch = false;
                                 }
                             });
 
