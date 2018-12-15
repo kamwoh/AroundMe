@@ -107,7 +107,6 @@ public class ArticleEditActivity extends AppCompatActivity {
 
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        ab.setTitle("Add New Article for " + tag);
 
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.article_view_map);
@@ -256,10 +255,12 @@ public class ArticleEditActivity extends AppCompatActivity {
 
         edit = getIntent().getBooleanExtra("edit", false);
 
+        ab.setTitle("Add New Article for " + tag);
+
         if (edit) {
             articleId = getIntent().getStringExtra("articleId");
 
-            setTitle("Edit Article");
+            ab.setTitle("Edit Article");
 
             blockTouch = true;
 //            progressBar.setVisibility(View.VISIBLE);
